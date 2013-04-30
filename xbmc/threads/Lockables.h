@@ -114,7 +114,7 @@ namespace XbmcThreads
     L& mutex;
     bool owns;
     inline UniqueLock(L& lockable) : mutex(lockable), owns(true) { mutex.lock(); }
-    inline UniqueLock(L& lockable, bool try_to_lock_discrim ) : mutex(lockable) { owns = mutex.try_lock(); }
+    inline UniqueLock(L& lockable, bool /* try_to_lock_discrim */ ) : mutex(lockable) { owns = mutex.try_lock(); }
     inline ~UniqueLock() { if (owns) mutex.unlock(); }
 
   public:

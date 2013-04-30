@@ -96,6 +96,7 @@ public:
 
   virtual bool Load(const TiXmlNode *settings);
   virtual bool Save(TiXmlNode *settings) const;
+  virtual void Clear() {}
 
   char MD5_Sign[32 + 1];
 

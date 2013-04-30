@@ -85,7 +85,7 @@ public:
   \return Returns \e true, if directory is created or if it already exists
   \sa CDirectoryFactory
   */
-  virtual bool Create(const char* strPath) { return false; }
+  virtual bool Create(const char* /* strPath */) { return false; }
   /*!
   \brief Check for directory existence
   \param strPath Directory to check.
