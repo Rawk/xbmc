@@ -1090,16 +1090,29 @@ bool CGUIWindowSlideShow::PlayVideo()
     return false;
   CLog::Log(LOGDEBUG, "Playing current video slide %s", item->GetPath().c_str());
   m_bPlayingVideo = true;
+<<<<<<< HEAD
   PlayBackRet ret = g_application.PlayFile(*item);
   if (ret == PLAYBACK_OK)
     return true;
   if (ret == PLAYBACK_FAIL)
+=======
+  /* PlayBackRet */ bool ret = g_application.PlayFile(*item);
+  if (ret/* == PLAYBACK_OK*/)
+    return true;
+  else
+//  if (ret == PLAYBACK_FAIL)
+>>>>>>> upstream/master
   {
     CLog::Log(LOGINFO, "set video %s unplayable", item->GetPath().c_str());
     item->SetProperty("unplayable", true);
   }
+<<<<<<< HEAD
   else if (ret == PLAYBACK_CANCELED)
     m_bPause = true;
+=======
+//  else if (ret == PLAYBACK_CANCELED)
+//    m_bPause = true;
+>>>>>>> upstream/master
   m_bPlayingVideo = false;
   return false;
 }
