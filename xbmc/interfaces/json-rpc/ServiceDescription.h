@@ -22,7 +22,7 @@
 namespace JSONRPC
 {
   const char* const JSONRPC_SERVICE_ID          = "http://www.xbmc.org/jsonrpc/ServiceDescription.json";
-  const char* const JSONRPC_SERVICE_VERSION     = "6.5.0";
+  const char* const JSONRPC_SERVICE_VERSION     = "6.5.1";
   const char* const JSONRPC_SERVICE_DESCRIPTION = "JSON-RPC API of XBMC";
 
   const char* const JSONRPC_SERVICE_TYPES[] = {  
@@ -408,7 +408,7 @@ namespace JSONRPC
         "\"enum\": [ \"instrument\", \"style\", \"mood\", \"born\", \"formed\","
                   "\"description\", \"genre\", \"died\", \"disbanded\","
                   "\"yearsactive\", \"musicbrainzartistid\", \"fanart\","
-                  "\"compilationartist\", \"thumbnail\" ]"
+                  "\"thumbnail\", \"compilationartist\" ]"
       "}"
     "}",
     "\"Audio.Fields.Album\": {"
@@ -1250,7 +1250,7 @@ namespace JSONRPC
     "}",
     "\"Favourite.Type\": {"
       "\"type\": \"string\","
-        "\"enum\": [ \"media\", \"window\", \"script\", \"unknown\" ]"
+      "\"enum\": [ \"media\", \"window\", \"script\", \"unknown\" ]"
     "}",
     "\"Favourite.Details.Favourite\": {"
       "\"type\": \"array\","
@@ -3179,6 +3179,7 @@ namespace JSONRPC
           "\"limits\": { \"$ref\": \"List.LimitsReturned\", \"required\": true },"
           "\"favourites\": { \"type\": \"array\","
             "\"items\": { \"$ref\": \"Favourite.Details.Favourite\" }"
+          "}"
         "}"
       "}"
     "}",
@@ -3197,7 +3198,6 @@ namespace JSONRPC
       "],"
       "\"returns\": \"string\""
     "}"
-  "}"
   };
 
   const char* const JSONRPC_SERVICE_NOTIFICATIONS[] = {  

@@ -79,6 +79,22 @@ using ADDON::AddonPtr;
 using namespace CDDB;
 #endif
 
+static void AnnounceRemove(const std::string& content, int id)
+{
+  CVariant data;
+  data["type"] = content;
+  data["id"] = id;
+  ANNOUNCEMENT::CAnnouncementManager::Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "OnRemove", data);
+}
+
+static void AnnounceUpdate(const std::string& content, int id)
+{
+  CVariant data;
+  data["type"] = content;
+  data["id"] = id;
+  ANNOUNCEMENT::CAnnouncementManager::Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "OnUpdate", data);
+}
+
 CMusicDatabase::CMusicDatabase(void)
 {
 }
@@ -3727,7 +3743,7 @@ bool CMusicDatabase::UpdateOldVersion(int version)
     m_pDS->exec("CREATE INDEX idxSong3 ON song(idAlbum)");
     m_pDS->exec("CREATE INDEX idxSong6 ON song(idPath)");
 
-    m_pDS->exec("UPDATE song SET strMusicBrainzTrackID = NULL where strMusicBrainzTrackID = ''");
+    m_pDS->exec("UPDATE song SET strMusicBrainzTrackID = NULL");
     m_pDS->exec("CREATE UNIQUE INDEX idxArtist1 ON artist(strMusicBrainzArtistID(36))");
   }
 
@@ -4392,7 +4408,7 @@ bool CMusicDatabase::GetScraperForPath(const CStdString& strPath, ADDON::Scraper
       }
       if (m_pDS->eof() && params.GetAlbumId() != -1) // check album
       {
-        strSQL = PrepareSQL("select * from content where strPath='musicdb://albums/%i/'",params.GetGenreId());
+        strSQL = PrepareSQL("select * from content where strPath='musicdb://albums/%i/'",params.GetAlbumId());
         m_pDS->query(strSQL.c_str());
       }
       if (m_pDS->eof() && params.GetArtistId() != -1) // check artist
@@ -4620,7 +4636,8 @@ void CMusicDatabase::ExportToXML(const CStdString &xmlFile, bool singleFiles, bo
 
     // find all artists
     sql = "SELECT artist.idArtist AS idArtist, strArtist, "
-          "  strBorn, strFormed, strGenres,"
+          "  strMusicBrainzArtistID, "
+          "  strBorn, strFormed, strGenres, "
           "  strMoods, strStyles, strInstruments, "
           "  strBiography, strDied, strDisbanded, "
           "  strYearsActive, strImage, strFanart "
@@ -5229,22 +5246,6 @@ void CMusicDatabase::SetPropertiesForFileItem(CFileItem& item)
     if (GetAlbumInfo(idAlbum,album,NULL,true)) // true to force additional information
       SetPropertiesFromAlbum(item,album);
   }
-}
-
-void CMusicDatabase::AnnounceRemove(std::string content, int id)
-{
-  CVariant data;
-  data["type"] = content;
-  data["id"] = id;
-  ANNOUNCEMENT::CAnnouncementManager::Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "OnRemove", data);
-}
-
-void CMusicDatabase::AnnounceUpdate(std::string content, int id)
-{
-  CVariant data;
-  data["type"] = content;
-  data["id"] = id;
-  ANNOUNCEMENT::CAnnouncementManager::Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "OnUpdate", data);
 }
 
 void CMusicDatabase::SetArtForItem(int mediaId, const string &mediaType, const map<string, string> &art)
