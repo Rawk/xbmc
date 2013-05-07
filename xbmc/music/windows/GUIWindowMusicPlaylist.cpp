@@ -285,9 +285,9 @@ void CGUIWindowMusicPlayList::SavePlayList()
   {
     // need 2 rename it
     CStdString strFolder = URIUtils::AddFileToFolder(CSettings::Get().GetString("system.playlistspath"), "music");
-    CStdString strPath = URIUtils::AddFileToFolder(strFolder, strNewFileName);
     strNewFileName = CUtil::MakeLegalFileName(strNewFileName);
     strNewFileName += ".m3u";
+    CStdString strPath = URIUtils::AddFileToFolder(strFolder, strNewFileName);
 
     // get selected item
     int iItem = m_viewControl.GetSelectedItem();
