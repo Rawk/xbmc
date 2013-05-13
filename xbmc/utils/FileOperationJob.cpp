@@ -151,57 +151,63 @@ bool CFileOperationJob::DoProcess(FileAction action, CFileItemList & items, cons
   for (int iItem = 0; iItem < items.Size(); ++iItem)
   {
     CFileItemPtr pItem = items[iItem];
-    if (pItem->IsSelected())
+
+    if (!pItem->IsSelected())
+      continue;
+
+    CStdString strNoSlash = pItem->GetPath();
+    URIUtils::RemoveSlashAtEnd(strNoSlash);
+    CStdString strFileName = URIUtils::GetFileName(strNoSlash);
+
+    // URL Decode for cases where source uses URL encoding and target does not 
+    if ( URIUtils::ProtocolHasEncodedFilename(CURL(pItem->GetPath()).GetProtocol() )
+     && !URIUtils::ProtocolHasEncodedFilename(CURL(strDestFile).GetProtocol() ) )
+      CURL::Decode(strFileName);
+
+    // special case for upnp
+    if (URIUtils::IsUPnP(items.GetPath()) || URIUtils::IsUPnP(pItem->GetPath()))
     {
-      CStdString strNoSlash = pItem->GetPath();
-      URIUtils::RemoveSlashAtEnd(strNoSlash);
-      CStdString strFileName = URIUtils::GetFileName(strNoSlash);
+      // get filename from label instead of path
+      strFileName = pItem->GetLabel();
 
-      // URL Decode for cases where source uses URL encoding and target does not 
-      if ( URIUtils::ProtocolHasEncodedFilename(CURL(pItem->GetPath()).GetProtocol() )
-       && !URIUtils::ProtocolHasEncodedFilename(CURL(strDestFile).GetProtocol() ) )
-        CURL::Decode(strFileName);
-
-      // special case for upnp
-      if (URIUtils::IsUPnP(items.GetPath()) || URIUtils::IsUPnP(pItem->GetPath()))
+      if(!pItem->m_bIsFolder && URIUtils::GetExtension(strFileName).length() == 0)
       {
-        // get filename from label instead of path
-        strFileName = pItem->GetLabel();
-
-        if(!pItem->m_bIsFolder && URIUtils::GetExtension(strFileName).length() == 0)
-        {
-          // FIXME: for now we only work well if the url has the extension
-          // we should map the content type to the extension otherwise
-          strFileName += URIUtils::GetExtension(pItem->GetPath());
-        }
-
-        strFileName = CUtil::MakeLegalFileName(strFileName);
+        // FIXME: for now we only work well if the url has the extension
+        // we should map the content type to the extension otherwise
+        strFileName += URIUtils::GetExtension(pItem->GetPath());
       }
 
-      CStdString strnewDestFile;
-      if(!strDestFile.IsEmpty()) // only do this if we have a destination
-        strnewDestFile = URIUtils::AddFileToFolder(strDestFile, strFileName);
+      strFileName = CUtil::MakeLegalFileName(strFileName);
+    }
 
-      if (pItem->m_bIsFolder)
-      {
-        // in ActionReplace mode all subdirectories will be removed by the below
-        // DoProcessFolder(ActionDelete) call as well, so ActionCopy is enough when
-        // processing those
-        FileAction subdirAction = (action == ActionReplace) ? ActionCopy : action;
-        // create folder on dest. drive
-        if (action != ActionDelete && action != ActionDeleteFolder)
-          DoProcessFile(ActionCreateFolder, strnewDestFile, "", fileOperations, totalTime);
-        if (action == ActionReplace && CDirectory::Exists(strnewDestFile))
-          DoProcessFolder(ActionDelete, strnewDestFile, "", fileOperations, totalTime);
-        if (!DoProcessFolder(subdirAction, pItem->GetPath(), strnewDestFile, fileOperations, totalTime))
-          return false;
-        if (action == ActionDelete || action == ActionDeleteFolder)
-          DoProcessFile(ActionDeleteFolder, pItem->GetPath(), "", fileOperations, totalTime);
-      }
+    if (pItem->m_bIsFolder)
+    {
+      // in ActionReplace mode all subdirectories will be removed by the below
+      // DoProcessFolder(ActionDelete) call as well, so ActionCopy is enough when
+      // processing those
+      FileAction subdirAction = (action == ActionReplace) ? ActionCopy : action;
+      // create folder on dest. drive
+      if (action != ActionDelete && action != ActionDeleteFolder)
+        DoProcessFile(ActionCreateFolder, strDestFile, "", fileOperations, totalTime);
+      if (action == ActionReplace && CDirectory::Exists(strDestFile))
+        DoProcessFolder(ActionDelete, strDestFile, "", fileOperations, totalTime);
+      if (!DoProcessFolder(subdirAction, pItem->GetPath(), strDestFile, fileOperations, totalTime))
+        return false;
+      if (action == ActionDelete || action == ActionDeleteFolder)
+        DoProcessFile(ActionDeleteFolder, pItem->GetPath(), "", fileOperations, totalTime);
+    }
+    else
+    {
+      CStdString strNewDestFile;
+      if(!strDestFile.IsEmpty())
+        strNewDestFile = URIUtils::AddFileToFolder(strDestFile, strFileName);
       else
-        DoProcessFile(action, pItem->GetPath(), strnewDestFile, fileOperations, totalTime);
+        strNewDestFile = strDestFile;
+
+      DoProcessFile(action, pItem->GetPath(), strNewDestFile, fileOperations, totalTime);
     }
   }
+
   return true;
 }
 

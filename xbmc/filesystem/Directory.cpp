@@ -284,9 +284,12 @@ bool CDirectory::Remove(const CStdString& strPath)
   {
     CStdString realPath = URIUtils::SubstitutePath(strPath);
     auto_ptr<IDirectory> pDirectory(CDirectoryFactory::Create(realPath));
-    if (pDirectory.get())
-      if(pDirectory->Remove(realPath.c_str()))
-        return true;
+    if (pDirectory.get() &&
+        pDirectory->Remove(realPath.c_str()))
+    {
+      g_directoryCache.ClearFile(realPath);
+      return true;
+    }
   }
   XBMCCOMMONS_HANDLE_UNCHECKED
   catch (...)
