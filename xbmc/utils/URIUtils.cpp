@@ -962,12 +962,6 @@ CStdString URIUtils::GetDirectory(const CStdString &strFilePath)
   return strFilePath.Left(iPos + 1) + strOptions; // Path and options
 }
 
-void URIUtils::GetDirectory(const CStdString& strFilePath,
-                            CStdString& strDirectoryPath)
-{
-  strDirectoryPath = GetDirectory(strFilePath);
-}
-
 void URIUtils::CreateArchivePath(CStdString& strUrlPath,
                                  const CStdString& strType,
                                  const CStdString& strArchivePath,

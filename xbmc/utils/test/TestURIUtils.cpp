@@ -56,6 +56,12 @@ TEST_F(TestURIUtils, IsInPath)
 TEST_F(TestURIUtils, GetDirectory)
 {
   EXPECT_STREQ("/path/to/", URIUtils::GetDirectory("/path/to/movie.avi"));
+  EXPECT_STREQ("/path/to/", URIUtils::GetDirectory("/path/to/"));
+  EXPECT_STREQ("/path/to/|option=foo", URIUtils::GetDirectory("/path/to/movie.avi|option=foo"));
+  EXPECT_STREQ("/path/to/|option=foo", URIUtils::GetDirectory("/path/to/|option=foo"));
+  EXPECT_STREQ("", URIUtils::GetDirectory("movie.avi"));
+  EXPECT_STREQ("|option=foo", URIUtils::GetDirectory("movie.avi|option=foo"));
+  EXPECT_STREQ("", URIUtils::GetDirectory(""));
 }
 
 TEST_F(TestURIUtils, GetExtension)

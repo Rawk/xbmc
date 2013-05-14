@@ -32,8 +32,6 @@ public:
                                        bool preserveFileNameInPath);
   static bool IsInPath(const CStdString &uri, const CStdString &baseURI);
 
-  static void GetDirectory(const CStdString& strFilePath,
-                           CStdString& strDirectoryPath);
   static CStdString GetDirectory(const CStdString &filePath);
   static const CStdString GetFileName(const CStdString& strFileNameAndPath);
 
