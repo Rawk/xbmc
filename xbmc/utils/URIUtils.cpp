@@ -210,11 +210,7 @@ void URIUtils::GetCommonPath(CStdString& strParent, const CStdString& strPath)
   strParent = strParent.Left(j - 1);
   // they should at least share a / at the end, though for things such as path/cd1 and path/cd2 there won't be
   if (!HasSlashAtEnd(strParent))
-  {
-    // currently GetDirectory() removes trailing slashes
-    GetDirectory(strParent.Mid(0), strParent);
-    AddSlashAtEnd(strParent);
-  }
+    strParent = GetDirectory(strParent);
 }
 
 bool URIUtils::ProtocolHasParentInHostname(const CStdString& prot)
@@ -264,14 +260,14 @@ bool URIUtils::GetParentPath(const CStdString& strPath, CStdString& strParent)
     CStackDirectory dir;
     CFileItemList items;
     dir.GetDirectory(strPath,items);
-    GetDirectory(items[0]->GetPath(),items[0]->m_strDVDLabel);
+    items[0]->m_strDVDLabel = GetDirectory(items[0]->GetPath());
     if (items[0]->m_strDVDLabel.Mid(0,6).Equals("rar://") || items[0]->m_strDVDLabel.Mid(0,6).Equals("zip://"))
       GetParentPath(items[0]->m_strDVDLabel, strParent);
     else
       strParent = items[0]->m_strDVDLabel;
     for( int i=1;i<items.Size();++i)
     {
-      GetDirectory(items[i]->GetPath(),items[i]->m_strDVDLabel);
+      items[i]->m_strDVDLabel = GetDirectory(items[i]->GetPath());
       if (items[0]->m_strDVDLabel.Mid(0,6).Equals("rar://") || items[0]->m_strDVDLabel.Mid(0,6).Equals("zip://"))
         items[i]->SetPath(GetParentPath(items[i]->m_strDVDLabel));
       else

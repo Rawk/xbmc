@@ -143,9 +143,7 @@ bool CMusicInfoLoader::LoadItem(CFileItem* pItem)
     }
     else
     {
-      CStdString strPath;
-      URIUtils::GetDirectory(pItem->GetPath(), strPath);
-      URIUtils::AddSlashAtEnd(strPath);
+      CStdString strPath = URIUtils::GetDirectory(pItem->GetPath());
       if (strPath!=m_strPrevPath)
       {
         // The item is from another directory as the last one,

@@ -44,7 +44,7 @@ TEST(TestFileOperationJob, ActionCopy)
   item->Select(true);
   items.Add(item);
 
-  URIUtils::GetDirectory(tmpfilepath, destpath);
+  destpath = URIUtils::GetDirectory(tmpfilepath);
   destpath = URIUtils::AddFileToFolder(destpath, "copy");
   destfile = URIUtils::AddFileToFolder(destpath, URIUtils::GetFileName(tmpfilepath));
   ASSERT_FALSE(XFILE::CFile::Exists(destfile));
@@ -78,7 +78,7 @@ TEST(TestFileOperationJob, ActionMove)
   item->Select(true);
   items.Add(item);
 
-  URIUtils::GetDirectory(tmpfilepath, destpath);
+  destpath = URIUtils::GetDirectory(tmpfilepath);
   destpath = URIUtils::AddFileToFolder(destpath, "move");
   destfile = URIUtils::AddFileToFolder(destpath, URIUtils::GetFileName(tmpfilepath));
   ASSERT_FALSE(XFILE::CFile::Exists(destfile));
@@ -112,7 +112,7 @@ TEST(TestFileOperationJob, ActionDelete)
   item->Select(true);
   items.Add(item);
 
-  URIUtils::GetDirectory(tmpfilepath, destpath);
+  destpath = URIUtils::GetDirectory(tmpfilepath);
   destpath = URIUtils::AddFileToFolder(destpath, "delete");
   destfile = URIUtils::AddFileToFolder(destpath, URIUtils::GetFileName(tmpfilepath));
   ASSERT_FALSE(XFILE::CFile::Exists(destfile));
@@ -162,7 +162,7 @@ TEST(TestFileOperationJob, ActionReplace)
   item->Select(true);
   items.Add(item);
 
-  URIUtils::GetDirectory(tmpfilepath, destpath);
+  destpath = URIUtils::GetDirectory(tmpfilepath);
   destpath = URIUtils::AddFileToFolder(destpath, "replace");
   destfile = URIUtils::AddFileToFolder(destpath, URIUtils::GetFileName(tmpfilepath));
   ASSERT_FALSE(XFILE::CFile::Exists(destfile));
@@ -271,7 +271,7 @@ TEST(TestFileOperationJob, GetFunctions)
   item->Select(true);
   items.Add(item);
 
-  URIUtils::GetDirectory(tmpfilepath, destpath);
+  destpath = URIUtils::GetDirectory(tmpfilepath);
   destpath = URIUtils::AddFileToFolder(destpath, "getfunctions");
   destfile = URIUtils::AddFileToFolder(destpath, URIUtils::GetFileName(tmpfilepath));
   ASSERT_FALSE(XFILE::CFile::Exists(destfile));

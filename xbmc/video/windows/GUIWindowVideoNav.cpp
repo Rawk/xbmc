@@ -734,11 +734,11 @@ void CGUIWindowVideoNav::OnDeleteItem(CFileItemPtr pItem)
 
     if (URIUtils::GetFileName(strDeletePath).Equals("VIDEO_TS.IFO"))
     {
-      URIUtils::GetDirectory(strDeletePath.Mid(0),strDeletePath);
+      strDeletePath = URIUtils::GetDirectory(strDeletePath);
       if (strDeletePath.Right(9).Equals("VIDEO_TS/"))
       {
         URIUtils::RemoveSlashAtEnd(strDeletePath);
-        URIUtils::GetDirectory(strDeletePath.Mid(0),strDeletePath);
+        strDeletePath = URIUtils::GetDirectory(strDeletePath);
       }
     }
     if (URIUtils::HasSlashAtEnd(strDeletePath))
@@ -828,9 +828,7 @@ bool CGUIWindowVideoNav::DeleteItem(CFileItem* pItem, bool bUnavailable /* = fal
     database.SetPathHash(path,"");
   else
   {
-    CStdString strDirectory;
-    URIUtils::GetDirectory(path,strDirectory);
-    database.SetPathHash(strDirectory,"");
+    database.SetPathHash(URIUtils::GetDirectory(path), "");
   }
 
   return true;

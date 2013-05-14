@@ -180,8 +180,7 @@ JSONRPC_STATUS CFileOperations::GetFileDetails(const CStdString &method, ITransp
   if (!CFile::Exists(file))
     return InvalidParams;
 
-  CStdString path;
-  URIUtils::GetDirectory(file, path);
+  CStdString path = URIUtils::GetDirectory(file);
 
   CFileItemList items;
   if (path.empty() || !CDirectory::GetDirectory(path, items) || !items.Contains(file))

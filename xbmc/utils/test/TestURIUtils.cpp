@@ -55,11 +55,7 @@ TEST_F(TestURIUtils, IsInPath)
 
 TEST_F(TestURIUtils, GetDirectory)
 {
-  CStdString ref, var;
-
-  ref = "/path/to/";
-  URIUtils::GetDirectory("/path/to/movie.avi", var);
-  EXPECT_STREQ(ref.c_str(), var.c_str());
+  EXPECT_STREQ("/path/to/", URIUtils::GetDirectory("/path/to/movie.avi"));
 }
 
 TEST_F(TestURIUtils, GetExtension)

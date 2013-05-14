@@ -2721,8 +2721,8 @@ CStdString CFileItem::GetTBNFile() const
 
   if (URIUtils::IsInRAR(strFile) || URIUtils::IsInZIP(strFile))
   {
-    CStdString strPath, strParent;
-    URIUtils::GetDirectory(strFile,strPath);
+    CStdString strPath = URIUtils::GetDirectory(strFile);
+    CStdString strParent;
     URIUtils::GetParentPath(strPath,strParent);
     strFile = URIUtils::AddFileToFolder(strParent, URIUtils::GetFileName(m_strPath));
   }
@@ -2798,8 +2798,8 @@ CStdString CFileItem::GetLocalArt(const std::string &artFile, bool useFolder) co
 
   if (URIUtils::IsInRAR(strFile) || URIUtils::IsInZIP(strFile))
   {
-    CStdString strPath, strParent;
-    URIUtils::GetDirectory(strFile,strPath);
+    CStdString strPath = URIUtils::GetDirectory(strFile);
+    CStdString strParent;
     URIUtils::GetParentPath(strPath,strParent);
     strFile = URIUtils::AddFileToFolder(strParent, URIUtils::GetFileName(strFile));
   }
@@ -2927,8 +2927,8 @@ CStdString CFileItem::GetLocalFanart() const
   }
   if (URIUtils::IsInRAR(strFile) || URIUtils::IsInZIP(strFile))
   {
-    CStdString strPath, strParent;
-    URIUtils::GetDirectory(strFile,strPath);
+    CStdString strPath = URIUtils::GetDirectory(strFile);
+    CStdString strParent;
     URIUtils::GetParentPath(strPath,strParent);
     strFile = URIUtils::AddFileToFolder(strParent, URIUtils::GetFileName(m_strPath));
   }
@@ -2945,8 +2945,7 @@ CStdString CFileItem::GetLocalFanart() const
    || m_strPath.IsEmpty())
     return "";
 
-  CStdString strDir;
-  URIUtils::GetDirectory(strFile, strDir);
+  CStdString strDir = URIUtils::GetDirectory(strFile);
 
   if (strDir.IsEmpty())
     return "";
@@ -3183,8 +3182,8 @@ CStdString CFileItem::FindTrailer() const
   }
   if (URIUtils::IsInRAR(strFile) || URIUtils::IsInZIP(strFile))
   {
-    CStdString strPath, strParent;
-    URIUtils::GetDirectory(strFile,strPath);
+    CStdString strPath = URIUtils::GetDirectory(strFile);
+    CStdString strParent;
     URIUtils::GetParentPath(strPath,strParent);
     strFile = URIUtils::AddFileToFolder(strParent,URIUtils::GetFileName(m_strPath));
   }
@@ -3198,8 +3197,7 @@ CStdString CFileItem::FindTrailer() const
    || IsDVD())
     return "";
 
-  CStdString strDir;
-  URIUtils::GetDirectory(strFile, strDir);
+  CStdString strDir = URIUtils::GetDirectory(strFile);
   CFileItemList items;
   CDirectory::GetDirectory(strDir, items, g_advancedSettings.m_videoExtensions, DIR_FLAG_READ_CACHE | DIR_FLAG_NO_FILE_INFO);
   URIUtils::RemoveExtension(strFile);

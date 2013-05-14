@@ -1101,15 +1101,11 @@ bool CMusicDatabase::GetSongByFileName(const CStdString& strFileName, CSong& son
       return GetSong(atol(strFile.c_str()), song);
     }
 
-    CStdString strPath;
-    URIUtils::GetDirectory(strFileName, strPath);
-    URIUtils::AddSlashAtEnd(strPath);
-
     if (NULL == m_pDB.get()) return false;
     if (NULL == m_pDS.get()) return false;
 
+    CStdString strPath = URIUtils::GetDirectory(strFileName);
     DWORD crc = ComputeCRC(strFileName);
-
     CStdString strSQL=PrepareSQL("select * from songview "
                                 "where dwFileNameCRC='%ul' and strPath='%s'"
                                 , crc,
@@ -2025,8 +2021,7 @@ bool CMusicDatabase::CleanupSongsByIds(const CStdString &strSongIds)
       CStdString strExtension=URIUtils::GetExtension(strFileName);
       if (strExtension==".oggstream" || strExtension==".nsfstream")
       {
-        CStdString strFileAndPath=strFileName;
-        URIUtils::GetDirectory(strFileAndPath, strFileName);
+        strFileName = URIUtils::GetDirectory(strFileName);
         // we are dropping back to a file, so remove the slash at end
         URIUtils::RemoveSlashAtEnd(strFileName);
       }
@@ -4347,10 +4342,8 @@ int CMusicDatabase::GetSongIDFromPath(const CStdString &filePath)
   {
     if (NULL == m_pDB.get()) return -1;
     if (NULL == m_pDS.get()) return -1;
-    CStdString strPath;
-    URIUtils::GetDirectory(filePath, strPath);
-    URIUtils::AddSlashAtEnd(strPath);
 
+    CStdString strPath = URIUtils::GetDirectory(filePath);
     DWORD crc = ComputeCRC(filePath);
 
     CStdString sql = PrepareSQL("select idSong from song join path on song.idPath = path.idPath where song.dwFileNameCRC='%ul'and path.strPath='%s'", crc, strPath.c_str());
