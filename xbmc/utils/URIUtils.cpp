@@ -944,39 +944,32 @@ CStdString URIUtils::AddFileToFolder(const CStdString& strFolder,
   return strResult;
 }
 
-CStdString URIUtils::GetDirectory(const CStdString &filePath)
+CStdString URIUtils::GetDirectory(const CStdString &strFilePath)
 {
-  CStdString directory;
-  GetDirectory(filePath, directory);
-  return directory;
+  // Will from a full filename return the directory the file resides in.
+  // Keeps the final slash at end and possible |option=foo options.
+
+  size_t iPos = strFilePath.find_last_of("/\\|");
+
+  if (iPos == string::npos)
+    return CStdString(); // No path and no options
+
+  if (strFilePath[iPos] != '|')
+    return strFilePath.Left(iPos + 1); // Only path
+
+  CStdString strOptions = strFilePath.Mid(iPos);
+  iPos = strFilePath.find_last_of("/\\", iPos);
+
+  if (iPos == string::npos)
+    return strOptions; // Only options
+
+  return strFilePath.Left(iPos + 1) + strOptions; // Path and options
 }
 
 void URIUtils::GetDirectory(const CStdString& strFilePath,
                             CStdString& strDirectoryPath)
 {
-  // Will from a full filename return the directory the file resides in.
-  // Keeps the final slash at end
-
-  int iPos1 = strFilePath.ReverseFind('/');
-  int iPos2 = strFilePath.ReverseFind('\\');
-
-  if (iPos2 > iPos1)
-  {
-    iPos1 = iPos2;
-  }
-
-  if (iPos1 > 0)
-  {
-    strDirectoryPath = strFilePath.Left(iPos1 + 1); // include the slash
-
-    // Keep possible |option=foo options for certain paths
-    iPos2 = strFilePath.ReverseFind('|');
-    if (iPos2 > 0)
-    {
-      strDirectoryPath += strFilePath.Mid(iPos2);
-    }
-
-  }
+  strDirectoryPath = GetDirectory(strFilePath);
 }
 
 void URIUtils::CreateArchivePath(CStdString& strUrlPath,
