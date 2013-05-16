@@ -43,7 +43,8 @@ public:
                     CStdString& strPath, CStdString& strFileName);
   static CStdStringArray SplitPath(const CStdString& strPath);
 
-  static void GetCommonPath(CStdString& strPath, const CStdString& strPath2);
+  static CStdString GetCommonPath(const CStdString& strPath1, const CStdString& strPath2);
+  static CStdString GetCommonPath2(const CStdString& strPath1, const CStdString& strPath2);
   static CStdString GetParentPath(const CStdString& strPath);
   static bool GetParentPath(const CStdString& strPath, CStdString& strParent);
   static CStdString SubstitutePath(const CStdString& strPath);

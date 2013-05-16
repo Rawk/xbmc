@@ -3941,7 +3941,7 @@ bool CMusicDatabase::GetArtistPath(int idArtist, CStdString &basePath)
       if (basePath.IsEmpty())
         basePath = path;
       else
-        URIUtils::GetCommonPath(basePath,path);
+        basePath = URIUtils::GetCommonPath(basePath, path);
 
       m_pDS2->next();
     }

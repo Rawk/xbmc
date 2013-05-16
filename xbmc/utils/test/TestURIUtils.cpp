@@ -127,12 +127,90 @@ TEST_F(TestURIUtils, SplitPathLocal)
 
 TEST_F(TestURIUtils, GetCommonPath)
 {
-  CStdString ref, var;
+  CStdString path1 = "/part/in/common/2/movie.avi";
+  CStdString path2 = "/part/in/common/to/movie.avi";
+  CStdString result;
+  for (int i=0; i<100000; ++i)
+  {
+    result = URIUtils::GetCommonPath(path1, path2);
+  }
 
-  ref = "/path/";
-  var = "/path/2/movie.avi";
-  URIUtils::GetCommonPath(var, "/path/to/movie.avi");
-  EXPECT_STREQ(ref.c_str(), var.c_str());
+  // Part in common
+  EXPECT_STREQ(                         "/part/in/common/",
+                URIUtils::GetCommonPath("/part/in/common/2/movie.avi",
+                                        "/part/in/common/to/movie.avi"));
+  // All in common without filename
+  EXPECT_STREQ(                         "/all/in/common/",
+                URIUtils::GetCommonPath("/all/in/common/",
+                                        "/all/in/common/"));
+  // All in common with filename
+  EXPECT_STREQ(                         "/all/in/common/",
+                URIUtils::GetCommonPath("/all/in/common/incl_file.avi", 
+                                        "/all/in/common/incl_file.avi"));
+  // Nothing in common except root
+  EXPECT_STREQ(                         "/",
+                URIUtils::GetCommonPath("/only/root/in/common.mp3",
+                                        "/with/this/movie.avi"));
+  // Nothing at all in common
+  EXPECT_STREQ(                         "",
+                URIUtils::GetCommonPath("nothing/in/common.mp3",
+                                        "with/this/movie.avi"));
+  // Empty path 1
+  EXPECT_STREQ(                         "",
+                URIUtils::GetCommonPath("",
+                                        "/path/to/movie.avi"));
+  // Empty path 2
+  EXPECT_STREQ(                         "",
+                URIUtils::GetCommonPath("/path/to/movie.avi",
+                                        ""));
+  // Empty Path 1 and 2
+  EXPECT_STREQ(                         "",
+                URIUtils::GetCommonPath("",
+                                        ""));
+}
+
+TEST_F(TestURIUtils, GetCommonPath2)
+{
+  CStdString path1 = "/part/in/common/2/movie.avi";
+  CStdString path2 = "/part/in/common/to/movie.avi";
+  CStdString result;
+  for (int i=0; i<100000; ++i)
+  {
+    result = URIUtils::GetCommonPath2(path1, path2);
+  }
+
+  // Part in common
+  EXPECT_STREQ(                         "/part/in/common/",
+                URIUtils::GetCommonPath2("/part/in/common/2/movie.avi",
+                                        "/part/in/common/to/movie.avi"));
+  // All in common without filename
+  EXPECT_STREQ(                         "/all/in/common/",
+                URIUtils::GetCommonPath2("/all/in/common/",
+                                        "/all/in/common/"));
+  // All in common with filename
+  EXPECT_STREQ(                         "/all/in/common/",
+                URIUtils::GetCommonPath2("/all/in/common/incl_file.avi", 
+                                        "/all/in/common/incl_file.avi"));
+  // Nothing in common except root
+  EXPECT_STREQ(                         "/",
+                URIUtils::GetCommonPath2("/only/root/in/common.mp3",
+                                        "/with/this/movie.avi"));
+  // Nothing at all in common
+  EXPECT_STREQ(                         "",
+                URIUtils::GetCommonPath2("nothing/in/common.mp3",
+                                        "with/this/movie.avi"));
+  // Empty path 1
+  EXPECT_STREQ(                         "",
+                URIUtils::GetCommonPath2("",
+                                        "/path/to/movie.avi"));
+  // Empty path 2
+  EXPECT_STREQ(                         "",
+                URIUtils::GetCommonPath2("/path/to/movie.avi",
+                                        ""));
+  // Empty Path 1 and 2
+  EXPECT_STREQ(                         "",
+                URIUtils::GetCommonPath2("",
+                                        ""));
 }
 
 TEST_F(TestURIUtils, GetParentPath)

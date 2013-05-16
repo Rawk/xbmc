@@ -193,20 +193,25 @@ CStdStringArray URIUtils::SplitPath(const CStdString& strPath)
   return dirs;
 }
 
-void URIUtils::GetCommonPath(CStdString& strParent, const CStdString& strPath)
+CStdString URIUtils::GetCommonPath(const CStdString& strPath1, const CStdString& strPath2)
 {
-  // find the common path of parent and path
-  unsigned int j = 1;
-  while (j <= min(strParent.size(), strPath.size()) && strnicmp(strParent.c_str(), strPath.c_str(), j) == 0)
-    j++;
-  strParent = strParent.Left(j - 1);
-  // they should at least share a / at the end, though for things such as path/cd1 and path/cd2 there won't be
-  if (!HasSlashAtEnd(strParent))
-  {
-    // currently GetDirectory() removes trailing slashes
-    GetDirectory(strParent.Mid(0), strParent);
-    AddSlashAtEnd(strParent);
-  }
+  CStdString::const_iterator itPos = mismatch(strPath1.begin(), strPath1.end(),
+                                                      strPath2.begin()).first;
+  // Now that we have found the first mismatch, search backwards to
+  // find the last slash
+  while (--itPos > strPath1.begin() &&
+         *itPos != '/' &&
+         *itPos != '\\');
+
+  return strPath1.substr(0, itPos - strPath1.begin() + 1); // Include slash*/
+}
+
+CStdString URIUtils::GetCommonPath2(const CStdString& strPath1, const CStdString& strPath2)
+{
+  // Iterate to the first mismatching char
+  CStdString::const_iterator itPos = mismatch(strPath1.begin(), strPath1.end(),
+                                                      strPath2.begin()).first;
+  return GetDirectory(strPath1.substr(0, itPos - strPath1.begin()));
 }
 
 bool URIUtils::ProtocolHasParentInHostname(const CStdString& prot)
@@ -269,7 +274,7 @@ bool URIUtils::GetParentPath(const CStdString& strPath, CStdString& strParent)
       else
         items[i]->SetPath(items[i]->m_strDVDLabel);
 
-      GetCommonPath(strParent,items[i]->GetPath());
+      strParent = GetCommonPath(strParent, items[i]->GetPath());
     }
     return true;
   }
