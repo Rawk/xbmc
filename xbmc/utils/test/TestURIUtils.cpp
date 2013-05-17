@@ -62,6 +62,11 @@ TEST_F(TestURIUtils, GetDirectory)
   EXPECT_STREQ("", URIUtils::GetDirectory("movie.avi"));
   EXPECT_STREQ("|option=foo", URIUtils::GetDirectory("movie.avi|option=foo"));
   EXPECT_STREQ("", URIUtils::GetDirectory(""));
+
+  // Make sure it works when assigning to the same str as the reference parameter
+  CStdString var = "/path/to/movie.avi|option=foo";
+  var = URIUtils::GetDirectory(var);
+  EXPECT_STREQ("/path/to/|option=foo", var);
 }
 
 TEST_F(TestURIUtils, GetExtension)
