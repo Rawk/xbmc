@@ -477,7 +477,7 @@ void CScraperParser::Clean(CStdString& strDirty)
     if ((i2=strDirty.Find("!!!ENCODE!!!",i+12)) != -1)
     {
       strBuffer = strDirty.substr(i+12,i2-i-12);
-      CURL::Encode(strBuffer);
+      strBuffer = CURL::Encode(strBuffer);
       strDirty.erase(i,i2-i+12);
       strDirty.Insert(i,strBuffer);
       i += strBuffer.size();

@@ -252,21 +252,20 @@ bool CGUIDialogAddonSettings::ShowVirtualKeyboard(int iControl)
             bEncoded = (strstr(option, "urlencoded") != NULL);
           }
           if (bEncoded)
-            CURL::Decode(value);
+            value = CURL::Decode(value);
 
           if (CGUIKeyboardFactory::ShowAndGetInput(value, label, true, bHidden))
           {
             // if hidden hide input
             if (bHidden)
             {
-              CStdString hiddenText;
-              hiddenText.append(value.size(), L'*');
+              CStdString hiddenText(value.size(), L'*');
               ((CGUIButtonControl *)control)->SetLabel2(hiddenText);
             }
             else
               ((CGUIButtonControl*) control)->SetLabel2(value);
             if (bEncoded)
-              CURL::Encode(value);
+              value = CURL::Encode(value);
           }
         }
         else if (strcmp(type, "number") == 0 && CGUIDialogNumeric::ShowAndGetNumber(value, label))
@@ -708,11 +707,10 @@ void CGUIDialogAddonSettings::CreateControls()
           // get any option to test for hidden
           const char *option = setting->Attribute("option");
           if (option && (strstr(option, "urlencoded")))
-            CURL::Decode(value);
+            value = CURL::Decode(value);
           if (option && (strstr(option, "hidden")))
           {
-            CStdString hiddenText;
-            hiddenText.append(value.size(), L'*');
+            CStdString hiddenText(value.size(), L'*');
             ((CGUIButtonControl *)pControl)->SetLabel2(hiddenText);
           }
           else

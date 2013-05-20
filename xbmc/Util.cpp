@@ -226,9 +226,8 @@ CStdString CUtil::GetTitleFromPath(const CStdString& strFileNameAndPath, bool bI
     return strFilename;
   }
   
-  // URLDecode since the original path may be an URL
-  CURL::Decode(strFilename);
-  return strFilename;
+  // Decode since the original path may be an URL
+  return CURL::Decode(strFilename);
 }
 
 void CUtil::CleanString(const CStdString& strFileName, CStdString& strTitle, CStdString& strTitleAndYear, CStdString& strYear, bool bRemoveExtension /* = false */, bool bCleanChars /* = true */)
@@ -2166,7 +2165,7 @@ bool CUtil::FindVobSubPair( const std::vector<CStdString>& vecSubtitles, const C
       CStdString strSubDirectory;
       URIUtils::Split(vecSubtitles[j], strSubDirectory, strSubFile);
       if (URIUtils::IsInArchive(vecSubtitles[j]))
-        CURL::Decode(strSubDirectory);
+        strSubDirectory = CURL::Decode(strSubDirectory);
       if (URIUtils::GetExtension(strSubFile) == ".sub" &&
           (URIUtils::ReplaceExtension(strIdxFile,"").Equals(URIUtils::ReplaceExtension(strSubFile,"")) ||
            strSubDirectory.Mid(6, strSubDirectory.length()-11).Equals(URIUtils::ReplaceExtension(strIdxPath,""))))
@@ -2189,7 +2188,7 @@ bool CUtil::IsVobSub( const std::vector<CStdString>& vecSubtitles, const CStdStr
     CStdString strSubDirectory;
     URIUtils::Split(strSubPath, strSubDirectory, strSubFile);
     if (URIUtils::IsInArchive(strSubPath))
-      CURL::Decode(strSubDirectory);
+      strSubDirectory = CURL::Decode(strSubDirectory);
     for (unsigned int j=0; j < vecSubtitles.size(); j++)
     {
       CStdString strIdxFile;

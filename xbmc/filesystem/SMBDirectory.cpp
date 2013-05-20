@@ -151,7 +151,7 @@ bool CSMBDirectory::GetDirectory(const CStdString& strPath, CFileItemList &items
         if ((m_flags & DIR_FLAG_NO_FILE_INFO)==0 && g_advancedSettings.m_sambastatfiles)
         {
           // make sure we use the authenticated path wich contains any default username
-          CStdString strFullName = strAuth + smb.URLEncode(strFile);
+          CStdString strFullName = strAuth + CURL::Encode(strFile);
 
           lock.Enter();
 
@@ -207,7 +207,7 @@ bool CSMBDirectory::GetDirectory(const CStdString& strPath, CFileItemList &items
           CURL rooturl(strRoot);
           rooturl.SetFileName("");
           rooturl.SetHostName("");
-          path = smb.URLEncode(rooturl);
+          path = CSMB::URLEncode(rooturl);
         }
         path = URIUtils::AddFileToFolder(path,aDir.name);
         URIUtils::AddSlashAtEnd(path);
@@ -256,7 +256,7 @@ int CSMBDirectory::OpenDir(const CURL& url, CStdString& strAuth)
   CURL urlIn(url);
 
   CPasswordManager::GetInstance().AuthenticateURL(urlIn);
-  strAuth = smb.URLEncode(urlIn);
+  strAuth = CSMB::URLEncode(urlIn);
 
   // remove the / or \ at the end. the samba library does not strip them off
   // don't do this for smb:// !!
@@ -340,7 +340,7 @@ bool CSMBDirectory::Create(const char* strPath)
 
   CURL url(strPath);
   CPasswordManager::GetInstance().AuthenticateURL(url);
-  CStdString strFileName = smb.URLEncode(url);
+  CStdString strFileName = CSMB::URLEncode(url);
 
   int result = smbc_mkdir(strFileName.c_str(), 0);
   success = (result == 0 || EEXIST == errno);
@@ -361,7 +361,7 @@ bool CSMBDirectory::Remove(const char* strPath)
 
   CURL url(strPath);
   CPasswordManager::GetInstance().AuthenticateURL(url);
-  CStdString strFileName = smb.URLEncode(url);
+  CStdString strFileName = CSMB::URLEncode(url);
 
   int result = smbc_rmdir(strFileName.c_str());
 
@@ -385,7 +385,7 @@ bool CSMBDirectory::Exists(const char* strPath)
 
   CURL url(strPath);
   CPasswordManager::GetInstance().AuthenticateURL(url);
-  CStdString strFileName = smb.URLEncode(url);
+  CStdString strFileName = CSMB::URLEncode(url);
 
 #ifdef TARGET_WINDOWS
   SMB_STRUCT_STAT info;
@@ -408,7 +408,7 @@ CStdString CSMBDirectory::MountShare(const CStdString &smbPath, const CStdString
 
 #if defined(TARGET_DARWIN)
   // Create the directory.
-  CURL::Decode(strMountPoint);
+  strMountPoint = CURL::Decode(strMountPoint);
   CreateDirectory(strMountPoint, NULL);
 
   // Massage the path.
@@ -459,7 +459,7 @@ void CSMBDirectory::UnMountShare(const CStdString &strType, const CStdString &st
 #if defined(TARGET_DARWIN)
   // Decode the path.
   CStdString strMountPoint = GetMountPoint(strType, strName);
-  CURL::Decode(strMountPoint);
+  strMountPoint = CURL::Decode(strMountPoint);
 
   // Make the unmount command.
   CStdStringArray args;
@@ -476,8 +476,7 @@ void CSMBDirectory::UnMountShare(const CStdString &strType, const CStdString &st
 
 CStdString CSMBDirectory::GetMountPoint(const CStdString &strType, const CStdString &strName)
 {
-  CStdString strPath = strType + strName;
-  CURL::Encode(strPath);
+  CStdString strPath = CURL::Encode(strType + strName);
 
 #if defined(TARGET_DARWIN)
   CStdString str = getenv("HOME");

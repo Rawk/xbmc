@@ -38,13 +38,6 @@ using namespace XFILE;
 
 #define AFP_MAX_READ_SIZE 131072
 
-CStdString URLEncode(const CStdString value)
-{
-  CStdString encoded(value);
-  CURL::Encode(encoded);
-  return encoded;
-}
-
 void AfpConnectionLog(void *priv, enum loglevels loglevel, int logtype, const char *message)
 {
   if (!message) return;

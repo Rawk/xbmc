@@ -768,8 +768,7 @@ namespace VIDEO
 
       if (!EnumerateEpisodeItem(items[i].get(), episodeList))
       {
-        CStdString decode(items[i]->GetPath());
-        CURL::Decode(decode);
+        CStdString decode = CURL::Decode(items[i]->GetPath());
         CLog::Log(LOGDEBUG, "VideoInfoScanner: Could not enumerate file %s", decode.c_str());
       }
     }
@@ -864,9 +863,8 @@ namespace VIDEO
   {
     SETTINGS_TVSHOWLIST expression = g_advancedSettings.m_tvshowEnumRegExps;
 
-    CStdString strLabel=item->GetPath();
     // URLDecode in case an episode is on a http/https/dav/davs:// source and URL-encoded like foo%201x01%20bar.avi
-    CURL::Decode(strLabel);
+    CStdString strLabel = CURL::Decode(item->GetPath());
     strLabel.MakeLower();
 
     for (unsigned int i=0;i<expression.size();++i)

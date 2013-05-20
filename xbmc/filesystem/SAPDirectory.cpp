@@ -360,9 +360,7 @@ bool CSAPSessions::ParseAnnounce(char* data, int len)
   }
 
   // add a new session to our buffer
-  CStdString path, user;
-  user = origin.username;
-  CURL::Encode(user);
+  CStdString path;
   path.Format("sap://%s/%s/0x%x.sdp", header.origin.c_str(), desc.origin.c_str(), header.msgid);
   CSession session;
   session.path           = path;

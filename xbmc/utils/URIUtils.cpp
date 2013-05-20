@@ -977,24 +977,14 @@ void URIUtils::CreateArchivePath(CStdString& strUrlPath,
                                  const CStdString& strFilePathInArchive,
                                  const CStdString& strPwd)
 {
-  CStdString strBuffer;
-
   strUrlPath = strType+"://";
 
-  if( !strPwd.IsEmpty() )
-  {
-    strBuffer = strPwd;
-    CURL::Encode(strBuffer);
-    strUrlPath += strBuffer;
-    strUrlPath += "@";
-  }
+  if (!strPwd.IsEmpty())
+    strUrlPath += "@" + CURL::Encode(strPwd);
 
-  strBuffer = strArchivePath;
-  CURL::Encode(strBuffer);
+  strUrlPath += CURL::Encode(strArchivePath);
 
-  strUrlPath += strBuffer;
-
-  strBuffer = strFilePathInArchive;
+  CStdString strBuffer = strFilePathInArchive;
   strBuffer.Replace('\\', '/');
   strBuffer.TrimLeft('/');
 
@@ -1002,11 +992,7 @@ void URIUtils::CreateArchivePath(CStdString& strUrlPath,
   strUrlPath += strBuffer;
 
 #if 0 // options are not used
-  strBuffer = strCachePath;
-  CURL::Encode(strBuffer);
-
-  strUrlPath += "?cache=";
-  strUrlPath += strBuffer;
+  strUrlPath += "?cache=" + CURL::Encode(strCachePath);
 
   strBuffer.Format("%i", wOptions);
   strUrlPath += "&flags=";

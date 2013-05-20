@@ -148,14 +148,12 @@ bool CMultiPathDirectory::Remove(const char* strPath)
 
 CStdString CMultiPathDirectory::GetFirstPath(const CStdString &strPath)
 {
-  int pos = strPath.Find("/", 12);
-  if (pos >= 0)
-  {
-    CStdString firstPath = strPath.Mid(12, pos - 12);
-    CURL::Decode(firstPath);
-    return firstPath;
-  }
-  return "";
+  // Ignore the 12 char prefix "multipath://"
+  size_t iPos = strPath.find('/', 12);
+  if (iPos == string::npos)
+    return CStdString();
+
+  return CURL::Decode(strPath.substr(12, iPos - 12));
 }
 
 bool CMultiPathDirectory::GetPaths(const CStdString& strPath, vector<CStdString>& vecPaths)
@@ -170,16 +168,13 @@ bool CMultiPathDirectory::GetPaths(const CStdString& strPath, vector<CStdString>
   // split on "/"
   vector<CStdString> vecTemp;
   StringUtils::SplitString(strPath1, "/", vecTemp);
-  if (vecTemp.size() == 0)
+  if (vecTemp.empty())
     return false;
 
   // check each item
   for (unsigned int i = 0; i < vecTemp.size(); i++)
-  {
-    CStdString tempPath = vecTemp[i];
-    CURL::Decode(tempPath);
-    vecPaths.push_back(tempPath);
-  }
+    vecPaths.push_back(CURL::Decode(vecTemp[i]));
+  
   return true;
 }
 
@@ -192,15 +187,11 @@ bool CMultiPathDirectory::HasPath(const CStdString& strPath, const CStdString& s
   // split on "/"
   vector<CStdString> vecTemp;
   StringUtils::SplitString(strPath1, "/", vecTemp);
-  if (vecTemp.size() == 0)
-    return false;
 
   // check each item
   for (unsigned int i = 0; i < vecTemp.size(); i++)
   {
-    CStdString tempPath = vecTemp[i];
-    CURL::Decode(tempPath);
-    if(tempPath == strPathToFind)
+    if (CURL::Decode(vecTemp[i]) == strPathToFind)
       return true;
   }
   return false;
@@ -222,12 +213,9 @@ CStdString CMultiPathDirectory::ConstructMultiPath(const CFileItemList& items, c
 
 void CMultiPathDirectory::AddToMultiPath(CStdString& strMultiPath, const CStdString& strPath)
 {
-  CStdString strPath1 = strPath;
   URIUtils::AddSlashAtEnd(strMultiPath);
   //CLog::Log(LOGDEBUG, "-- adding path: %s", strPath.c_str());
-  CURL::Encode(strPath1);
-  strMultiPath += strPath1;
-  strMultiPath += "/";
+  strMultiPath += CURL::Encode(strPath) + '/';
 }
 
 CStdString CMultiPathDirectory::ConstructMultiPath(const vector<CStdString> &vecPaths)

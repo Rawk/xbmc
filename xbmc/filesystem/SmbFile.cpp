@@ -246,22 +246,17 @@ CStdString CSMB::URLEncode(const CURL &url)
 
   CStdString flat = "smb://";
 
-  if(url.GetDomain().length() > 0)
-  {
-    flat += URLEncode(url.GetDomain());
-    flat += ";";
-  }
+  if(!url.GetDomain().empty())
+    flat += CURL::Encode(url.GetDomain()) + ';';
 
   /* samba messes up of password is set but no username is set. don't know why yet */
   /* probably the url parser that goes crazy */
-  if(url.GetUserName().length() > 0 /* || url.GetPassWord().length() > 0 */)
+  if (!url.GetUserName().empty() /* || !url.GetPassWord().empty() */)
   {
-    flat += URLEncode(url.GetUserName());
-    flat += ":";
-    flat += URLEncode(url.GetPassWord());
-    flat += "@";
+    flat += CURL::Encode(url.GetUserName()) + ':';
+    flat += CURL::Encode(url.GetPassWord()) + '@';
   }
-  flat += URLEncode(url.GetHostName());
+  flat += CURL::Encode(url.GetHostName());
 
   /* okey sadly since a slash is an invalid name we have to tokenize */
   std::vector<CStdString> parts;
@@ -269,20 +264,13 @@ CStdString CSMB::URLEncode(const CURL &url)
   CUtil::Tokenize(url.GetFileName(), parts, "/");
   for( it = parts.begin(); it != parts.end(); it++ )
   {
-    flat += "/";
-    flat += URLEncode((*it));
+    flat += '/';
+    flat += CURL::Encode((*it));
   }
 
   /* okey options should go here, thou current samba doesn't support any */
 
   return flat;
-}
-
-CStdString CSMB::URLEncode(const CStdString &value)
-{
-  CStdString encoded(value);
-  CURL::Encode(encoded);
-  return encoded;
 }
 
 #ifdef TARGET_WINDOWS
@@ -760,5 +748,6 @@ CStdString CSmbFile::GetAuthenticatedPath(const CURL &url)
 {
   CURL authURL(url);
   CPasswordManager::GetInstance().AuthenticateURL(authURL);
-  return smb.URLEncode(authURL);
+  return CSMB::URLEncode(authURL);
 }
+

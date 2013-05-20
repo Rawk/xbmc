@@ -35,13 +35,6 @@
 using namespace std;
 using namespace ADDON;
 
-CStdString URLEncodeInline(const CStdString& strData)
-{
-  CStdString buffer = strData;
-  CURL::Encode(buffer);
-  return buffer;
-}
-
 CURL::CURL(const CStdString& strURL1)
 {
   Parse(strURL1);
@@ -126,7 +119,7 @@ void CURL::Parse(const CStdString& strURL1)
         if (!(s.st_mode & S_IFDIR))
 #endif
         {
-          Encode(archiveName);
+          archiveName = Encode(archiveName);
           if (is_apk)
           {
             CURL c((CStdString)"apk" + "://" + archiveName + '/' + strURL.Right(strURL.size() - iPos - 1));
@@ -627,11 +620,11 @@ CStdString CURL::GetWithoutFilename() const
   }
   else if (m_strUserName != "")
   {
-    strURL += URLEncodeInline(m_strUserName);
+    strURL += Encode(m_strUserName);
     if (m_strPassword != "")
     {
       strURL += ":";
-      strURL += URLEncodeInline(m_strPassword);
+      strURL += Encode(m_strPassword);
     }
     strURL += "@";
   }
@@ -641,7 +634,7 @@ CStdString CURL::GetWithoutFilename() const
   if (m_strHostName != "")
   {
     if( URIUtils::ProtocolHasEncodedHostname(m_strProtocol) )
-      strURL += URLEncodeInline(m_strHostName);
+      strURL += Encode(m_strHostName);
     else
       strURL += m_strHostName;
     if (HasPort())
@@ -681,7 +674,7 @@ bool CURL::IsFullPath(const CStdString &url)
   return false;
 }
 
-void CURL::Decode(CStdString& strURLData)
+CStdString CURL::Decode(const CStdString& strURLData)
 //modified to be more accomodating - if a non hex value follows a % take the characters directly and don't raise an error.
 // However % characters should really be escaped like any other non safe character (www.rfc-editor.org/rfc/rfc1738.txt)
 {
@@ -715,10 +708,11 @@ void CURL::Decode(CStdString& strURLData)
     }
     else strResult += kar;
   }
-  strURLData = strResult;
+
+  return strResult;
 }
 
-void CURL::Encode(CStdString& strURLData)
+CStdString CURL::Encode(const CStdString& strURLData)
 {
   CStdString strResult;
 
@@ -740,21 +734,8 @@ void CURL::Encode(CStdString& strURLData)
       strResult += strTmp;
     }
   }
-  strURLData = strResult;
-}
 
-std::string CURL::Decode(const std::string& strURLData)
-{
-  CStdString url = strURLData;
-  Decode(url);
-  return url;
-}
-
-std::string CURL::Encode(const std::string& strURLData)
-{
-  CStdString url = strURLData;
-  Encode(url);
-  return url;
+  return strResult;
 }
 
 CStdString CURL::TranslateProtocol(const CStdString& prot)

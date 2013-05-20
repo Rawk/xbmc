@@ -2437,7 +2437,7 @@ void CFileItemList::StackFiles()
 
     URIUtils::Split(item1->GetPath(), filePath, file1);
     if (URIUtils::ProtocolHasEncodedFilename(CURL(filePath).GetProtocol() ) )
-      CURL::Decode(file1);
+      file1 = CURL::Decode(file1);
 
     int j;
     while (expr != stackRegExps.end())
@@ -2470,7 +2470,7 @@ void CFileItemList::StackFiles()
           CStdString file2, filePath2;
           URIUtils::Split(item2->GetPath(), filePath2, file2);
           if (URIUtils::ProtocolHasEncodedFilename(CURL(filePath2).GetProtocol() ) )
-            CURL::Decode(file2);
+            file2 = CURL::Decode(file2);
 
           if (expr->RegFind(file2, offset) != -1)
           {
@@ -2871,9 +2871,8 @@ CStdString CFileItem::GetMovieName(bool bUseFolderNames /* = false */) const
 
   URIUtils::RemoveSlashAtEnd(strMovieName);
   strMovieName = URIUtils::GetFileName(strMovieName);
-  CURL::Decode(strMovieName);
 
-  return strMovieName;
+  return CURL::Decode(strMovieName);
 }
 
 CStdString CFileItem::GetBaseMoviePath(bool bUseFolderNames) const
