@@ -199,6 +199,10 @@ LIB_DIRS += lib/cmyth
 CMYTH=cmyth
 endif
 
+ifeq (@USE_GTESTSUITE@,1)
+LIB_DIRS += lib/gtestsuite
+endif
+
 SS_DIRS=
 ifneq (@DISABLE_RSXS@,1)
   SS_DIRS+= xbmc/screensavers/rsxs-0.9/xbmc
@@ -260,6 +264,9 @@ FINAL_TARGETS+=Makefile externals
 GTEST_DIR = lib/gtest
 GTEST_INCLUDES = -I$(GTEST_DIR)/include
 GTEST_LIBS = $(GTEST_DIR)/lib/.libs/libgtest.a
+
+GPERFTOOLS_DIR = lib/gperftools
+GPERFTOOLS_LIBS = $(GPERFTOOLS_DIR)/.libs/libprofile.a
 
 CHECK_DIRS = xbmc/filesystem/test \
              xbmc/utils/test \
@@ -628,3 +635,11 @@ else
 check testsuite testframework:
 	@echo "Google Test Framework not configured, skipping testsuite check."
 endif
+
+gperftools: $(GPERFTOOLS_LIBS)
+
+$(GPERFTOOLS_LIBS): $(GPERFTOOLS_DIR)/Makefile
+
+$(GPERFTOOLS_DIR)/Makefile: force
+	$(MAKE) -C $(GPERFTOOLS_DIR)
+
