@@ -1,17 +1,17 @@
 TOPDIR ?= .
 INTERFACES_DIR ?= xbmc/interfaces
 
-JAVA ?= $(shell which java)
+JAVA ?= $(shell which java 2> /dev/null)
 ifeq ($(JAVA),)
 JAVA = java-not-found
 endif
 
-SWIG ?= $(shell which swig)
+SWIG ?= $(shell which swig 2> /dev/null)
 ifeq ($(SWIG),)
 SWIG = swig-not-found
 endif
 
-DOXYGEN ?= $(shell which doxygen)
+DOXYGEN ?= $(shell which doxygen 2> /dev/null)
 ifeq ($(DOXYGEN),)
 DOXYGEN = doxygen-not-found
 else

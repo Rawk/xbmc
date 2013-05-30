@@ -68,15 +68,15 @@ endif
 
 libdvdcss/src/.libs/libdvdcss.a: libdvdcss;
 libdvdcss: compile
-	$(MAKE) -C $@
+	$(MAKE) $(if $(V),,-s) -C $@
 
 libdvdread/obj/libdvdread.a: libdvdread;
 libdvdread: compile
-	$(MAKE) -C $@
+	$(MAKE) $(if $(V),,-s) -C $@
 
 libdvdnav/obj/libdvdnav.a: libdvdnav;
 libdvdnav: compile
-	$(MAKE) -C $@
+	$(MAKE) $(if $(V),,-s) -C $@
 
 include @abs_top_srcdir@/Makefile.include
 

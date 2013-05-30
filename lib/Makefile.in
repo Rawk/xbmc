@@ -73,7 +73,7 @@ ffmpeg/libswresample/libswresample.so : ffmpeg;
 endif
 
 ffmpeg:
-	$(MAKE) -C $@
+	$(MAKE) $(if $(V),,-s) -C $@
 ifeq ($(findstring osx,$(ARCH)), osx)
 	-$(AR) d ffmpeg/libavcodec/libavcodec.a log2_tab.o
 	-$(AR) d ffmpeg/libavformat/libavformat.a log2_tab.o

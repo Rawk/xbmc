@@ -135,7 +135,7 @@ $(LIB): $(OBJS)
 	$(SILENT_AR) $(AR) $(ARFLAGS) $(LIB) $(OBJS)
 
 pch: $(PCH:.h=.h.gch)
-	for d in $(DIRS); do (cd "$$d"; $(MAKE) pch ); done
+	@for d in $(DIRS); do (cd "$$d"; $(MAKE) $(if $(V),,-s) pch ); done
 
 clean: 
 	$(RM) $(OBJS) *.o $(LIB) $(SLIB) $(CLEAN_FILES) $(PCH:.h=.h.gch) $(DEPS)

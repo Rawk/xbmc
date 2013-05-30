@@ -5,6 +5,7 @@ AC_PREREQ(2.59)
 AC_CONFIG_SRCDIR([src/hack.hh])
 AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE([1.7 subdir-objects std-options])
+AM_SILENT_RULES([yes])
 AC_SUBST(RELEASE, 1)
 
 AC_CONFIG_MACRO_DIR(m4)

@@ -303,9 +303,9 @@ config.status: configure
 # skin textures
 ifeq (@USE_TEXTUREPACKER@,1)
 skins: tools/TexturePacker/TexturePacker force
-	 $(MAKE) -C $(CONFLUENCE_MEDIA)
+	 @$(MAKE) $(if $(V),,-s) -C $(CONFLUENCE_MEDIA)
 ifeq (@USE_SKIN_TOUCHED@,1)
-	 $(MAKE) -C $(TOUCHED_MEDIA)
+	 @$(MAKE) $(if $(V),,-s) -C $(TOUCHED_MEDIA)
 endif
 else
 skins:
@@ -322,22 +322,22 @@ $(DIRECTORY_ARCHIVES): force
 	@$(MAKE) $(if $(V),,-s) -C $(@D)
 
 lib/cpluff/libcpluff/.libs/libcpluff.a: force
-	$(MAKE) -C lib/cpluff/libcpluff
+	@$(MAKE) $(if $(V),,-s) -C lib/cpluff/libcpluff
 system/libcpluff-@ARCH@.so: lib/cpluff/libcpluff/.libs/libcpluff.a exports
 ifeq ($(findstring osx,@ARCH@), osx)
   ifeq (@ARCH@, arm-osx)
-	$(CXX) $(LDFLAGS) -all_load -bundle -flat_namespace -undefined dynamic_lookup -read_only_relocs suppress -o $@ $<
+	$(SILENT_LD) $(CXX) $(LDFLAGS) -all_load -bundle -flat_namespace -undefined dynamic_lookup -read_only_relocs suppress -o $@ $<
   else
-	$(CXX) $(LDFLAGS) -all_load -bundle -flat_namespace -undefined dynamic_lookup -lexpat $(BUNDLE1_O) -o $@ $<
+	$(SILENT_LD) $(CXX) $(LDFLAGS) -all_load -bundle -flat_namespace -undefined dynamic_lookup -lexpat $(BUNDLE1_O) -o $@ $<
   endif
 else
-	$(CXX) $(LDFLAGS) -shared -o $@ -Wl,--whole-archive $< \
+	$(SILENT_LD) $(CXX) $(LDFLAGS) -shared -o $@ -Wl,--whole-archive $< \
 		-Wl,--no-whole-archive  \
 		`cat xbmc/cores/DllLoader/exports/wrapper.def` xbmc/cores/DllLoader/exports/wrapper.o -lexpat
 endif
 
 exports: xbmc/cores/DllLoader/exports/exports.a xbmc/cores/DllLoader/exports/util/exports_utils.a
-	$(MAKE) -C xbmc/cores/DllLoader/exports wrapper.def
+	@$(MAKE) $(if $(V),,-s) -C xbmc/cores/DllLoader/exports wrapper.def
 dllloader: exports xbmc/cores/DllLoader/dllloader.a
 
 ifeq (@USE_OPENGLES@,1)
@@ -345,61 +345,61 @@ EGLHELPERS=xbmc/visualizations/EGLHelpers/eglhelpers.a
 endif
 
 $(VIS_DIRS): force exports $(EGLHELPERS)
-	$(MAKE) -C $@
+	@$(MAKE) $(if $(V),,-s) -C $@
 
 $(SS_DIRS): force exports
-	$(MAKE) -C $@
+	@$(MAKE) $(if $(V),,-s) -C $@
 
 visualizations: $(VIS_DIRS)
 
 screensavers: $(SS_DIRS)
 
 libaddon: exports
-	$(MAKE) -C lib/addons/library.xbmc.addon
-	$(MAKE) -C lib/addons/library.xbmc.codec
-	$(MAKE) -C lib/addons/library.xbmc.gui
-	$(MAKE) -C lib/addons/library.xbmc.pvr
+	@$(MAKE) $(if $(V),,-s) -C lib/addons/library.xbmc.addon
+	@$(MAKE) $(if $(V),,-s) -C lib/addons/library.xbmc.codec
+	@$(MAKE) $(if $(V),,-s) -C lib/addons/library.xbmc.gui
+	@$(MAKE) $(if $(V),,-s) -C lib/addons/library.xbmc.pvr
 dvdpcodecs: dllloader
-	$(MAKE) -C lib
-	$(MAKE) -C lib/libdvd
+	@$(MAKE) $(if $(V),,-s) -C lib
+	@$(MAKE) $(if $(V),,-s) -C lib/libdvd
 eventclients:
 ifeq ($(findstring osx,@ARCH@), osx)
 ifneq ($(findstring arm,@ARCH@), arm)
-	$(MAKE) -C tools/EventClients/Clients/OSXRemote
+	@$(MAKE) $(if $(V),,-s) -C tools/EventClients/Clients/OSXRemote
 endif
 else
-	$(MAKE) -C tools/EventClients
+	@$(MAKE) $(if $(V),,-s) -C tools/EventClients
 endif
 libexif: dllloader
-	$(MAKE) -C lib/libexif
+	@$(MAKE) $(if $(V),,-s) -C lib/libexif
 cmyth: dllloader
-	$(MAKE) -C lib/cmyth
+	@$(MAKE) $(if $(V),,-s) -C lib/cmyth
 libhdhomerun: dllloader
-	$(MAKE) -C lib/libhdhomerun
+	@$(MAKE) $(if $(V),,-s) -C lib/libhdhomerun
 papcodecs: dllloader dvdpcodecs
-	test -d system/players/paplayer || mkdir system/players/paplayer
-	$(MAKE) -C lib/xbadpcm
-	$(MAKE) -C lib/vgmstream
-	$(MAKE) -C lib/timidity
-	$(MAKE) -C lib/nosefart
+	@test -d system/players/paplayer || mkdir system/players/paplayer
+	@$(MAKE) $(if $(V),,-s) -C lib/xbadpcm
+	@$(MAKE) $(if $(V),,-s) -C lib/vgmstream
+	@$(MAKE) $(if $(V),,-s) -C lib/timidity
+	@$(MAKE) $(if $(V),,-s) -C lib/nosefart
 ifneq ($(findstring arm-osx,@ARCH@), arm-osx)
-	$(MAKE) -C lib/libsidplay2
+	@$(MAKE) $(if $(V),,-s) -C lib/libsidplay2
 endif
 ifeq (@USE_ASAP_CODEC@,1)
   ifneq ($(findstring osx,@ARCH@), osx)
-	$(MAKE) -C lib/asap asap-xbmc
+	@$(MAKE) $(if $(V),,-s) -C lib/asap asap-xbmc
   endif
 endif
-	$(MAKE) -C lib/stsound/StSoundLibrary
+	@$(MAKE) $(if $(V),,-s) -C lib/stsound/StSoundLibrary
 ifeq ($(or $(findstring powerpc,@ARCH@),$(findstring x86_64-linux,@ARCH@),$(findstring arm, @ARCH@),$(findstring freebsd,@ARCH@)),)
-	$(MAKE) -C lib/snesapu/SNES/SNESAPU
+	@$(MAKE) $(if $(V),,-s) -C lib/snesapu/SNES/SNESAPU
 endif
 imagelib: dllloader
-	$(MAKE) -C lib/cximage-6.0
+	@$(MAKE) $(if $(V),,-s) -C lib/cximage-6.0
 
 pvraddons: exports
 ifeq (@USE_PVR_ADDONS@,1)
-	$(MAKE) -C pvr-addons
+	@$(MAKE) $(if $(V),,-s) -C pvr-addons
 endif
 
 codecs: papcodecs dvdpcodecs
@@ -491,7 +491,7 @@ else
 endif
 
 tools/TexturePacker/TexturePacker: lib/libsquish/libsquish.a xbmc/guilib/XBTF.h
-	$(MAKE) -C tools/TexturePacker/
+	@$(MAKE) $(if $(V),,-s) -C tools/TexturePacker/
 
 
 install-bin: xbmc.bin # developement convenience target
@@ -523,7 +523,7 @@ endif
 install-arch:
 	@# Arch dependent files
 ifeq (@USE_PVR_ADDONS@,1)
-	$(MAKE) -C pvr-addons install
+	@$(MAKE) $(if $(V),,-s) -C pvr-addons install
 endif
 ifeq ($(findstring freebsd,@ARCH@), freebsd)
 	@find -E system addons -type f -not -iregex ".*svn.*" \
@@ -651,7 +651,7 @@ testframework: $(GTEST_LIBS)
 $(GTEST_LIBS): $(GTEST_DIR)/Makefile
 
 $(GTEST_DIR)/Makefile: force
-	$(MAKE) -C $(GTEST_DIR)
+	@$(MAKE) $(if $(V),,-s) -C $(GTEST_DIR)
 
 $(CHECK_LIBS): force
 	@$(MAKE) $(if $(V),,-s) -C $(@D)
