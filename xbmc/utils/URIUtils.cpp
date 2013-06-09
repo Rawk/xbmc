@@ -281,30 +281,21 @@ bool URIUtils::ProtocolHasEncodedFilename(const CStdString& prot)
 
 CStdString URIUtils::GetParentPath(const CStdString& strPath)
 {
-  CStdString strReturn;
-  GetParentPath(strPath, strReturn);
-  return strReturn;
-}
-
-bool URIUtils::GetParentPath(const CStdString& strPath, CStdString& strParent)
-{
-  strParent = "";
-
   CURL url(strPath);
   CStdString strFile = url.GetFileName();
   if ( URIUtils::ProtocolHasParentInHostname(url.GetProtocol()) && strFile.IsEmpty())
   {
-    strFile = url.GetHostName();
-    return GetParentPath(strFile, strParent);
+    return GetParentPath(url.GetHostName());
   }
   else if (url.GetProtocol() == "stack")
   {
+    CStdString strParent;
     CStackDirectory dir;
     CFileItemList items;
     dir.GetDirectory(strPath,items);
     GetDirectory(items[0]->GetPath(),items[0]->m_strDVDLabel);
     if (items[0]->m_strDVDLabel.Mid(0,6).Equals("rar://") || items[0]->m_strDVDLabel.Mid(0,6).Equals("zip://"))
-      GetParentPath(items[0]->m_strDVDLabel, strParent);
+      strParent = GetParentPath(items[0]->m_strDVDLabel);
     else
       strParent = items[0]->m_strDVDLabel;
     for( int i=1;i<items.Size();++i)
@@ -317,41 +308,38 @@ bool URIUtils::GetParentPath(const CStdString& strPath, CStdString& strParent)
 
       GetCommonPath(strParent,items[i]->GetPath());
     }
-    return true;
+    return strParent;
   }
   else if (url.GetProtocol() == "multipath")
   {
     // get the parent path of the first item
-    return GetParentPath(CMultiPathDirectory::GetFirstPath(strPath), strParent);
+    return GetParentPath(CMultiPathDirectory::GetFirstPath(strPath));
   }
   else if (url.GetProtocol() == "plugin")
   {
     if (!url.GetOptions().IsEmpty())
     {
       url.SetOptions("");
-      strParent = url.Get();
-      return true;
+      return url.Get();
     }
     if (!url.GetFileName().IsEmpty())
     {
       url.SetFileName("");
-      strParent = url.Get();
-      return true;
+      return url.Get();
     }
     if (!url.GetHostName().IsEmpty())
     {
       url.SetHostName("");
-      strParent = url.Get();
-      return true;
+      return url.Get();
     }
-    return true;  // already at root
+    return "";  // already at root
   }
   else if (url.GetProtocol() == "special")
   {
     if (HasSlashAtEnd(strFile) )
       strFile = strFile.Left(strFile.size() - 1);
     if(strFile.ReverseFind('/') < 0)
-      return false;
+      return "";
   }
   else if (strFile.size() == 0)
   {
@@ -360,10 +348,9 @@ bool URIUtils::GetParentPath(const CStdString& strPath, CStdString& strParent)
       // we have an share with only server or workgroup name
       // set hostname to "" and return true to get back to root
       url.SetHostName("");
-      strParent = url.Get();
-      return true;
+      return url.Get();
     }
-    return false;
+    return "";
   }
 
   if (HasSlashAtEnd(strFile) )
@@ -381,8 +368,7 @@ bool URIUtils::GetParentPath(const CStdString& strPath, CStdString& strParent)
   if (iPos < 0)
   {
     url.SetFileName("");
-    strParent = url.Get();
-    return true;
+    return url.Get();
   }
 
   strFile = strFile.Left(iPos);
@@ -390,8 +376,14 @@ bool URIUtils::GetParentPath(const CStdString& strPath, CStdString& strParent)
   AddSlashAtEnd(strFile);
 
   url.SetFileName(strFile);
-  strParent = url.Get();
-  return true;
+  return url.Get();
+}
+
+bool URIUtils::GetParentPath(const CStdString& strPath, CStdString& strParent)
+{
+  strParent = GetParentPath(strPath);
+
+  return !strPath.empty();
 }
 
 CStdString URIUtils::SubstitutePath(const CStdString& strPath)
