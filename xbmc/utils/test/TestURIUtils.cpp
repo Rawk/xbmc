@@ -156,15 +156,19 @@ TEST_F(TestURIUtils, GetCommonPath)
 
 TEST_F(TestURIUtils, GetParentPath)
 {
-  CStdString ref, var;
+  CStdString var;
 
-  ref = "/path/to/";
-  var = URIUtils::GetParentPath("/path/to/movie.avi");
-  EXPECT_STREQ(ref.c_str(), var.c_str());
+  EXPECT_TRUE(URIUtils::GetParentPath("rar://path/to/", var));
+  EXPECT_STREQ("rar://path/to/", var);
+
+  EXPECT_TRUE(URIUtils::GetParentPath("zip://rar:///foo/bar.zip/alice.rar/", var));
+  EXPECT_STREQ("rar://path/to/", var);
+
+  EXPECT_STREQ("/path/to/", URIUtils::GetParentPath("/path/to/movie.avi"));
 
   var.clear();
   EXPECT_TRUE(URIUtils::GetParentPath("/path/to/movie.avi", var));
-  EXPECT_STREQ(ref.c_str(), var.c_str());
+  EXPECT_STREQ("/path/to/", var);
 }
 
 TEST_F(TestURIUtils, SubstitutePath)
