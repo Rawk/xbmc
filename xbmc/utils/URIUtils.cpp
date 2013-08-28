@@ -283,8 +283,13 @@ CStdString URIUtils::GetParentPath(const CStdString& strPath)
 {
   CURL url(strPath);
   CStdString strFile = url.GetFileName();
+  cout << "strPath : " << strPath << endl;
+  cout << "FileName: " << url.GetFileName() << endl;
+  cout << "Protocol: " << url.GetProtocol() << endl;
+  cout << "HostName: " << url.GetHostName() << endl;
   if ( URIUtils::ProtocolHasParentInHostname(url.GetProtocol()) && strFile.IsEmpty())
   {
+    cout << "Is doing it!\n";
     return GetParentPath(url.GetHostName());
   }
   else if (url.GetProtocol() == "stack")
