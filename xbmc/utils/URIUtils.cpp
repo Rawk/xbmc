@@ -292,8 +292,15 @@ bool URIUtils::GetParentPath(const CStdString& strPath, CStdString& strParent)
 
   CURL url(strPath);
   CStdString strFile = url.GetFileName();
+  cout << "==================================" << endl;
+  cout << "strPath    : " << strPath << endl;
+  cout << "Protocol=\"" << url.GetProtocol();
+  cout << "\" HostName=\"" << url.GetHostName();
+  cout << "\" FileName=\"" << url.GetFileName() << "\"";
+  cout << "\" Get=\"" << url.Get() << "\"" << endl;
   if ( URIUtils::ProtocolHasParentInHostname(url.GetProtocol()) && strFile.IsEmpty())
   {
+    cout << "Branch 1" << endl;
     strFile = url.GetHostName();
     return GetParentPath(strFile, strParent);
   }

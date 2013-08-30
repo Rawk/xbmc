@@ -18,6 +18,8 @@
  *
  */
 
+#include "filesystem/File.h"
+#include "test/TestUtils.h"
 #include "utils/URIUtils.h"
 #include "settings/AdvancedSettings.h"
 #include "URL.h"
@@ -156,12 +158,33 @@ TEST_F(TestURIUtils, GetCommonPath)
 
 TEST_F(TestURIUtils, GetParentPath)
 {
+
   CStdString var;
 
-  EXPECT_TRUE(URIUtils::GetParentPath("rar://path/to/", var));
-  EXPECT_STREQ("rar://path/to/", var);
+  // This is an ugly hack that needs some work.
+  //                 example: filename /foo/bar.zip/alice.rar/bob.avi
+  // This should turn into zip://rar:///foo/bar.zip/alice.rar/bob.avi
 
-  EXPECT_TRUE(URIUtils::GetParentPath("zip://rar:///foo/bar.zip/alice.rar/", var));
+  // CURL::Parse requires zip files to exist. Create a temporary empy zip-file.
+  XFILE::CFile *pTmpFile = XBMC_CREATETEMPFILE(".zip");
+  ASSERT_TRUE(pTmpFile);
+  pTmpFile->Close();
+  CStdString strTmpFilePath = XBMC_TEMPFILEPATH(pTmpFile);
+  CStdString strEncodedPath = strTmpFilePath;
+  CURL::Encode(strEncodedPath);
+
+  EXPECT_TRUE(URIUtils::GetParentPath(strTmpFilePath + "/path/song.mp3", var));
+  EXPECT_STREQ("zip://" + strEncodedPath + "/path/", var);
+
+  EXPECT_TRUE(URIUtils::GetParentPath(strTmpFilePath + "/", var));
+  EXPECT_STREQ(URIUtils::GetParentPath(strTmpFilePath), var);
+
+  EXPECT_TRUE(XBMC_DELETETEMPFILE(pTmpFile));
+
+  EXPECT_TRUE(URIUtils::GetParentPath("zip://zip://file.zip/file_in_zip.zip", var));
+  EXPECT_STREQ("", var);
+
+  EXPECT_TRUE(URIUtils::GetParentPath("zip://rar:///path/to/rarfile.rar/file_in_rar.zip/file_in_zip.mp3", var));
   EXPECT_STREQ("rar://path/to/", var);
 
   EXPECT_STREQ("/path/to/", URIUtils::GetParentPath("/path/to/movie.avi"));
