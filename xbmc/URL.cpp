@@ -360,6 +360,20 @@ void CURL::SetFileName(const CStdString& strFileName)
     m_strFileType = "";
 
   m_strFileType.Normalize();
+/*================================================
+  size_t iPeriod = strFileName.rfind('.');
+  if (iPeriod != string::npos &&
+      strFileName.find(GetDirectorySeparator(), iPeriod + 1) == string::npos)
+  {
+    m_strFileType = strFileName.substr(iPeriod + 1);
+    m_strFileType.Normalize();
+  }
+  else
+  {
+    m_strFileType.clear();
+  }
+=============
+  m_strFileType = URIUtils::GetExtension(strFileName).substr(1); */
 }
 
 void CURL::SetHostName(const CStdString& strHostName)
