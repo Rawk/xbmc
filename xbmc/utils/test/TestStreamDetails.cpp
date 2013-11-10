@@ -27,7 +27,6 @@ TEST(TestStreamDetails, General)
   CStreamDetails a;
   CStreamDetailVideo *video = new CStreamDetailVideo();
   CStreamDetailAudio *audio = new CStreamDetailAudio();
-  CStreamDetailSubtitle *subtitle = new CStreamDetailSubtitle();
 
   video->m_iWidth = 1920;
   video->m_iHeight = 1080;
@@ -40,7 +39,7 @@ TEST(TestStreamDetails, General)
   audio->m_strCodec = "aac";
   audio->m_strLanguage = "eng";
 
-  subtitle->m_strLanguage = "eng";
+  CStreamDetailSubtitle subtitle("eng");
 
   a.AddStream(video);
   a.AddStream(audio);
@@ -66,7 +65,6 @@ TEST(TestStreamDetails, General)
   EXPECT_EQ(1, a.GetStreamCount(CStreamDetail::SUBTITLE));
   EXPECT_EQ(1, a.GetSubtitleStreamCount());
 
-  a.DetermineBestStreams();
   EXPECT_STREQ("h264", a.GetVideoCodec().c_str());
   EXPECT_EQ(2.39f, a.GetVideoAspect());
   EXPECT_EQ(1920, a.GetVideoWidth());

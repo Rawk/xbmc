@@ -3284,34 +3284,37 @@ bool CVideoDatabase::GetStreamDetails(CVideoInfoTag& tag) const
       {
       case CStreamDetail::VIDEO:
         {
-          CStreamDetailVideo *p = new CStreamDetailVideo();
-          p->m_strCodec = pDS->fv(2).get_asString();
-          p->m_fAspect = pDS->fv(3).get_asFloat();
-          p->m_iWidth = pDS->fv(4).get_asInt();
-          p->m_iHeight = pDS->fv(5).get_asInt();
-          p->m_iDuration = pDS->fv(10).get_asInt();
-          p->m_strStereoMode = pDS->fv(11).get_asString();
+          CStreamDetailVideo p(
+            pDS->fv(4).get_asInt(),      // width
+            pDS->fv(5).get_asInt(),      // height
+            pDS->fv(3).get_asFloat(),    // aspect
+            pDS->fv(10).get_asInt(),     // duration
+            pDS->fv(2).get_asString(),   // codec
+            pDS->fv(11).get_asString()); // stereo mode
+
           details.AddStream(p);
           retVal = true;
           break;
         }
       case CStreamDetail::AUDIO:
         {
-          CStreamDetailAudio *p = new CStreamDetailAudio();
-          p->m_strCodec = pDS->fv(6).get_asString();
-          if (pDS->fv(7).get_isNull())
-            p->m_iChannels = -1;
-          else
-            p->m_iChannels = pDS->fv(7).get_asInt();
-          p->m_strLanguage = pDS->fv(8).get_asString();
+          CStreamDetailAudio p(
+            -1,                         // channels
+            pDS->fv(8).get_asString(),  // language
+            pDS->fv(6).get_asString()); // codec
+
+          if (!pDS->fv(7).get_isNull())
+            p.m_iChannels = pDS->fv(7).get_asInt();
+
           details.AddStream(p);
           retVal = true;
           break;
         }
       case CStreamDetail::SUBTITLE:
         {
-          CStreamDetailSubtitle *p = new CStreamDetailSubtitle();
-          p->m_strLanguage = pDS->fv(9).get_asString();
+          CStreamDetailSubtitle p(
+            pDS->fv(9).get_asString()); // language
+
           details.AddStream(p);
           retVal = true;
           break;
@@ -3327,7 +3330,6 @@ bool CVideoDatabase::GetStreamDetails(CVideoInfoTag& tag) const
   {
     CLog::Log(LOGERROR, "%s(%i) failed", __FUNCTION__, tag.m_iFileId);
   }
-  details.DetermineBestStreams();
 
   if (details.GetVideoDuration() > 0)
     tag.m_duration = details.GetVideoDuration();

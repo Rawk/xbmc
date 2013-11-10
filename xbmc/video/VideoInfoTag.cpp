@@ -697,38 +697,37 @@ void CVideoInfoTag::ParseNative(const TiXmlElement* movie, bool prioritise)
       const TiXmlNode *nodeDetail = NULL;
       while ((nodeDetail = nodeStreamDetails->IterateChildren("audio", nodeDetail)))
       {
-        CStreamDetailAudio *p = new CStreamDetailAudio();
-        XMLUtils::GetString(nodeDetail, "codec", p->m_strCodec);
-        XMLUtils::GetString(nodeDetail, "language", p->m_strLanguage);
-        XMLUtils::GetInt(nodeDetail, "channels", p->m_iChannels);
-        StringUtils::ToLower(p->m_strCodec);
-        StringUtils::ToLower(p->m_strLanguage);
+        CStreamDetailAudio p;
+        XMLUtils::GetString(nodeDetail, "codec", p.m_strCodec);
+        XMLUtils::GetString(nodeDetail, "language", p.m_strLanguage);
+        XMLUtils::GetInt(nodeDetail, "channels", p.m_iChannels);
+        StringUtils::ToLower(p.m_strCodec);
+        StringUtils::ToLower(p.m_strLanguage);
         m_streamDetails.AddStream(p);
       }
       nodeDetail = NULL;
       while ((nodeDetail = nodeStreamDetails->IterateChildren("video", nodeDetail)))
       {
-        CStreamDetailVideo *p = new CStreamDetailVideo();
-        XMLUtils::GetString(nodeDetail, "codec", p->m_strCodec);
-        XMLUtils::GetFloat(nodeDetail, "aspect", p->m_fAspect);
-        XMLUtils::GetInt(nodeDetail, "width", p->m_iWidth);
-        XMLUtils::GetInt(nodeDetail, "height", p->m_iHeight);
-        XMLUtils::GetInt(nodeDetail, "durationinseconds", p->m_iDuration);
-        XMLUtils::GetString(nodeDetail, "stereomode", p->m_strStereoMode);
-        StringUtils::ToLower(p->m_strCodec);
-        StringUtils::ToLower(p->m_strStereoMode);
+        CStreamDetailVideo p;
+        XMLUtils::GetString(nodeDetail, "codec", p.m_strCodec);
+        XMLUtils::GetFloat(nodeDetail, "aspect", p.m_fAspect);
+        XMLUtils::GetInt(nodeDetail, "width", p.m_iWidth);
+        XMLUtils::GetInt(nodeDetail, "height", p.m_iHeight);
+        XMLUtils::GetInt(nodeDetail, "durationinseconds", p.m_iDuration);
+        XMLUtils::GetString(nodeDetail, "stereomode", p.m_strStereoMode);
+        StringUtils::ToLower(p.m_strCodec);
+        StringUtils::ToLower(p.m_strStereoMode);
         m_streamDetails.AddStream(p);
       }
       nodeDetail = NULL;
       while ((nodeDetail = nodeStreamDetails->IterateChildren("subtitle", nodeDetail)))
       {
-        CStreamDetailSubtitle *p = new CStreamDetailSubtitle();
-        XMLUtils::GetString(nodeDetail, "language", p->m_strLanguage);
-        StringUtils::ToLower(p->m_strLanguage);
+        CStreamDetailSubtitle p;
+        XMLUtils::GetString(nodeDetail, "language", p.m_strLanguage);
+        StringUtils::ToLower(p.m_strLanguage);
         m_streamDetails.AddStream(p);
       }
     }
-    m_streamDetails.DetermineBestStreams();
   }  /* if fileinfo */
 
   const TiXmlElement *epguide = movie->FirstChildElement("episodeguide");

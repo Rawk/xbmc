@@ -493,55 +493,43 @@ namespace XBMCAddon
 
       if (strcmpi(cType, "video") == 0)
       {
-        CStreamDetailVideo* video = new CStreamDetailVideo;
-        for (Dictionary::const_iterator it = dictionary.begin(); it != dictionary.end(); ++it)
-        {
-          const String& key = it->first;
-          const CStdString value(it->second.c_str());
+        CStreamDetailVideo video;
 
-          if (key == "codec")
-            video->m_strCodec = value;
-          else if (key == "aspect")
-            video->m_fAspect = (float)atof(value);
-          else if (key == "width")
-            video->m_iWidth = strtol(value, NULL, 10);
-          else if (key == "height")
-            video->m_iHeight = strtol(value, NULL, 10);
-          else if (key == "duration")
-            video->m_iDuration = strtol(value, NULL, 10);
-          else if (key == "stereomode")
-            video->m_strStereoMode = value;
-        }
+        if (dictionary.count("width") > 0)
+          video.m_iWidth = strtol(dictionary.at("width").c_str(), NULL, 10);
+        if (dictionary.count("height") > 0)
+          video.m_iHeight = strtol(dictionary.at("height").c_str(), NULL, 10);
+        if (dictionary.count("aspect") > 0)
+          video.m_fAspect = (float)atof(dictionary.at("aspect").c_str());
+        if (dictionary.count("duration") > 0)
+          video.m_iDuration = strtol(dictionary.at("duration").c_str(), NULL, 10);
+        if (dictionary.count("codec") > 0)
+          video.m_strCodec = dictionary.at("codec");
+        if (dictionary.count("stereomode") > 0)
+          video.m_strStereoMode = dictionary.at("stereomode");
+
         item->GetVideoInfoTag()->m_streamDetails.AddStream(video);
       }
       else if (strcmpi(cType, "audio") == 0)
       {
-        CStreamDetailAudio* audio = new CStreamDetailAudio;
-        for (Dictionary::const_iterator it = dictionary.begin(); it != dictionary.end(); ++it)
-        {
-          const String& key = it->first;
-          const String& value = it->second;
+        CStreamDetailAudio audio;
 
-          if (key == "codec")
-            audio->m_strCodec = value;
-          else if (key == "language")
-            audio->m_strLanguage = value;
-          else if (key == "channels")
-            audio->m_iChannels = strtol(value.c_str(), NULL, 10);
-        }
+        if (dictionary.count("channels") > 0)
+          audio.m_iChannels = strtol(dictionary.at("channels").c_str(), NULL, 10);
+        if (dictionary.count("language") > 0)
+          audio.m_strLanguage = dictionary.at("language");
+        if (dictionary.count("codec") > 0)
+          audio.m_strCodec = dictionary.at("codec");
+
         item->GetVideoInfoTag()->m_streamDetails.AddStream(audio);
       }
       else if (strcmpi(cType, "subtitle") == 0)
       {
-        CStreamDetailSubtitle* subtitle = new CStreamDetailSubtitle;
-        for (Dictionary::const_iterator it = dictionary.begin(); it != dictionary.end(); ++it)
-        {
-          const String& key = it->first;
-          const String& value = it->second;
+        CStreamDetailSubtitle subtitle;
 
-          if (key == "language")
-            subtitle->m_strLanguage = value;
-        }
+        if (dictionary.count("language") > 0)
+          subtitle.m_strLanguage = dictionary.at("language");
+
         item->GetVideoInfoTag()->m_streamDetails.AddStream(subtitle);
       }
     } // end ListItem::addStreamInfo
