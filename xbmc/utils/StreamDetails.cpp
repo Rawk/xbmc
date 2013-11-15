@@ -158,27 +158,11 @@ void CStreamDetailSubtitle::Serialize(CVariant& value) const
   value["language"] = m_strLanguage;
 }
 
-bool CStreamDetailSubtitle::IsWorseThan(const CStreamDetailSubtitle & /*that*/) const
-{
-  // the preferred subtitle should be the one in the user's language
-  if (!m_pParent || m_pParent->m_strLanguage == m_strLanguage)
-    return false;  // already the best
-  
-  return true;
-}
-
-bool operator< (const CStreamDetailSubtitle &lhs, const CStreamDetailSubtitle &rhs)
-{
-  return lhs.IsWorseThan(rhs);
-}
-
 CStreamDetailSubtitle& CStreamDetailSubtitle::operator=(const CStreamDetailSubtitle &that)
 {
   if (this != &that)
-  {
-    this->m_pParent = that.m_pParent;
     this->m_strLanguage = that.m_strLanguage;
-  }
+
   return *this;
 }
 
@@ -188,12 +172,12 @@ CStreamDetails& CStreamDetails::operator=(const CStreamDetails &that)
   {
     Reset();
 
-    for (std::vector<CStreamDetailVideo>::const_iterator it = that.m_vecVideoItems.begin();
-          it != that.m_vecVideoItems.end(); it++)
+    for (std::vector<CStreamDetailVideo>::const_iterator it = that.m_vecVideos.begin();
+          it != that.m_vecVideos.end(); it++)
       AddStream(*it);
 
-    for (std::vector<CStreamDetailAudio>::const_iterator it = that.m_vecAudioItems.begin();
-          it != that.m_vecAudioItems.end(); it++)
+    for (std::vector<CStreamDetailAudio>::const_iterator it = that.m_vecAudios.begin();
+          it != that.m_vecAudios.end(); it++)
       AddStream(*it);
 
     for (std::vector<CStreamDetailSubtitle>::const_iterator it = that.m_vecSubtitles.begin();
@@ -248,7 +232,7 @@ bool CStreamDetails::operator !=(const CStreamDetails &right) const
 
 bool CStreamDetails::HasItems() const
 {
-  return !m_vecVideoItems.empty() || !m_vecAudioItems.empty()
+  return !m_vecVideos.empty() || !m_vecAudios.empty()
           || !m_vecSubtitles.empty();
 }
 
@@ -257,9 +241,9 @@ int CStreamDetails::GetStreamCount(CStreamDetail::StreamType type) const
   switch (type)
   {
   case CStreamDetail::VIDEO:
-    return m_vecVideoItems.size();
+    return m_vecVideos.size();
   case CStreamDetail::AUDIO:
-    return m_vecAudioItems.size();
+    return m_vecAudios.size();
   case CStreamDetail::SUBTITLE:
     return m_vecSubtitles.size();
   }
@@ -269,12 +253,12 @@ int CStreamDetails::GetStreamCount(CStreamDetail::StreamType type) const
 
 int CStreamDetails::GetVideoStreamCount(void) const
 {
-  return m_vecVideoItems.size();
+  return m_vecVideos.size();
 }
 
 int CStreamDetails::GetAudioStreamCount(void) const
 {
-  return m_vecAudioItems.size();
+  return m_vecAudios.size();
 }
 
 int CStreamDetails::GetSubtitleStreamCount(void) const
@@ -289,24 +273,23 @@ CStreamDetails::CStreamDetails(const CStreamDetails &that)
 
 void CStreamDetails::AddStream(const CStreamDetailVideo &item)
 {
-  m_vecVideoItems.push_back(item);
+  m_vecVideos.push_back(item);
 }
 
 void CStreamDetails::AddStream(const CStreamDetailAudio &item)
 {
-  m_vecAudioItems.push_back(item);
+  m_vecAudios.push_back(item);
 }
 
 void CStreamDetails::AddStream(const CStreamDetailSubtitle &item)
 {
-  item.m_pParent = this;
   m_vecSubtitles.push_back(item);
 }
 
 void CStreamDetails::Reset(void)
 {
-  m_vecVideoItems.clear();
-  m_vecAudioItems.clear();
+  m_vecVideos.clear();
+  m_vecAudios.clear();
   m_vecSubtitles.clear();
 }
 
@@ -328,24 +311,24 @@ const CStreamDetail* CStreamDetails::GetNthStream(CStreamDetail::StreamType type
 
 const CStreamDetailVideo* CStreamDetails::GetNthVideoStream(unsigned int idx) const
 {
-  if (m_vecVideoItems.empty() || idx > m_vecVideoItems.size())
+  if (m_vecVideos.empty() || idx > m_vecVideos.size())
     return NULL;
 
   if (idx == 0)
-    return &(*max_element(m_vecVideoItems.begin(), m_vecVideoItems.end()));
+    return &(*max_element(m_vecVideos.begin(), m_vecVideos.end()));
 
-  return &m_vecVideoItems[idx - 1];
+  return &m_vecVideos[idx - 1];
 }
 
 const CStreamDetailAudio* CStreamDetails::GetNthAudioStream(unsigned int idx) const
 {
-  if (m_vecAudioItems.empty() || idx > m_vecAudioItems.size())
+  if (m_vecAudios.empty() || idx > m_vecAudios.size())
     return NULL;
 
   if (idx == 0)
-    return &(*max_element(m_vecAudioItems.begin(), m_vecAudioItems.end()));
+    return &(*max_element(m_vecAudios.begin(), m_vecAudios.end()));
 
-  return &m_vecAudioItems[idx - 1];
+  return &m_vecAudios[idx - 1];
 }
 
 const CStreamDetailSubtitle * CStreamDetails::GetNthSubtitleStream(unsigned int idx) const
@@ -354,7 +337,18 @@ const CStreamDetailSubtitle * CStreamDetails::GetNthSubtitleStream(unsigned int 
     return NULL;
 
   if (idx == 0)
-    return &(*max_element(m_vecSubtitles.begin(), m_vecSubtitles.end()));
+  {
+    // A good subtitle is the one in the language m_strLanguage.
+    for (std::vector<CStreamDetailSubtitle>::const_iterator it = m_vecSubtitles.begin();
+          it != m_vecSubtitles.end(); ++it)
+    {
+      if (it->m_strLanguage == m_strLanguage)
+        return &(*it);
+    }
+
+    // No good subtitle found. Just return anyone.
+    return &m_vecSubtitles.front();
+  }
 
   return &m_vecSubtitles[idx - 1];
 }
@@ -453,14 +447,14 @@ void CStreamDetails::Archive(CArchive& ar)
 {
   if (ar.IsStoring())
   {
-    ar << (int)m_vecVideoItems.size();
-    for (std::vector<CStreamDetailVideo>::iterator it = m_vecVideoItems.begin();
-          it != m_vecVideoItems.end(); it++)
+    ar << (int)m_vecVideos.size();
+    for (std::vector<CStreamDetailVideo>::iterator it = m_vecVideos.begin();
+          it != m_vecVideos.end(); it++)
       ar << (*it);
 
-    ar << (int)m_vecAudioItems.size();
-    for (std::vector<CStreamDetailAudio>::iterator it = m_vecAudioItems.begin();
-          it != m_vecAudioItems.end(); it++)
+    ar << (int)m_vecAudios.size();
+    for (std::vector<CStreamDetailAudio>::iterator it = m_vecAudios.begin();
+          it != m_vecAudios.end(); it++)
       ar << (*it);
 
     ar << (int)m_vecSubtitles.size();
@@ -508,8 +502,8 @@ void CStreamDetails::Serialize(CVariant& value) const
 
   // make sure these properties are always present
   value["video"] = CVariant(CVariant::VariantTypeArray);
-  for (std::vector<CStreamDetailVideo>::const_iterator it = m_vecVideoItems.begin();
-        it != m_vecVideoItems.end(); ++it)
+  for (std::vector<CStreamDetailVideo>::const_iterator it = m_vecVideos.begin();
+        it != m_vecVideos.end(); ++it)
   {
     v.clear();
     it->Serialize(v);
@@ -518,8 +512,8 @@ void CStreamDetails::Serialize(CVariant& value) const
 
   // make sure these properties are always present
   value["audio"] = CVariant(CVariant::VariantTypeArray);
-  for (std::vector<CStreamDetailAudio>::const_iterator it = m_vecAudioItems.begin();
-        it != m_vecAudioItems.end(); ++it)
+  for (std::vector<CStreamDetailAudio>::const_iterator it = m_vecAudios.begin();
+        it != m_vecAudios.end(); ++it)
   {
     v.clear();
     it->Serialize(v);

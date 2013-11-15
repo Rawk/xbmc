@@ -82,16 +82,9 @@ public:
   CStreamDetailSubtitle& operator=(const CStreamDetailSubtitle &that);
   virtual void Archive(CArchive& ar);
   virtual void Serialize(CVariant& value) const;
-  bool IsWorseThan(const CStreamDetailSubtitle &that) const;
 
   CStdString m_strLanguage;
-
-protected:
-  friend class CStreamDetails;
-  CStreamDetails *m_pParent;
 };
-
-bool operator< (const CStreamDetailSubtitle &lhs, const CStreamDetailSubtitle &rhs);
 
 class CStreamDetails : public IArchivable, public ISerializable
 {
@@ -141,8 +134,8 @@ public:
   CStdString m_strLanguage;
 
 private:
-  std::vector<CStreamDetailVideo> m_vecVideoItems;
-  std::vector<CStreamDetailAudio> m_vecAudioItems;
+  std::vector<CStreamDetailVideo> m_vecVideos;
+  std::vector<CStreamDetailAudio> m_vecAudios;
   std::vector<CStreamDetailSubtitle> m_vecSubtitles;
 };
 

@@ -22,9 +22,10 @@
 
 #include "guilib/GUIDialog.h"
 #include "view/GUIViewControl.h"
-#include "video/VideoDatabase.h"
+#include "video/Bookmark.h"
 
 class CFileItemList;
+class CVideoInfoTag;
 
 class CGUIDialogVideoBookmarks : public CGUIDialog
 {

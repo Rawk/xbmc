@@ -19,6 +19,7 @@
  */
 
 #include "InfoTagVideo.h"
+#include "video/VideoInfoTag.h"
 #include "utils/StringUtils.h"
 #include "settings/AdvancedSettings.h"
 

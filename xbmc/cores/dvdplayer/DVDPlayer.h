@@ -39,7 +39,6 @@
 #include "Edl.h"
 #include "FileItem.h"
 #include "threads/SingleLock.h"
-#include "utils/StreamDetails.h"
 #include "threads/SystemClock.h"
 
 
@@ -49,6 +48,7 @@ class CDVDDemux;
 class CDemuxStreamVideo;
 class CDemuxStreamAudio;
 class CStreamInfo;
+class CStreamDetails;
 
 namespace PVR
 {
