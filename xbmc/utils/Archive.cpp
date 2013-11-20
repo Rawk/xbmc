@@ -196,24 +196,6 @@ CArchive& CArchive::operator<<(const CVariant& variant)
   return *this;
 }
 
-CArchive& CArchive::operator<<(const std::vector<std::string>& strArray)
-{
-  *this << strArray.size();
-  for (size_t index = 0; index < strArray.size(); index++)
-    *this << strArray.at(index);
-
-  return *this;
-}
-
-CArchive& CArchive::operator<<(const std::vector<int>& iArray)
-{
-  *this << iArray.size();
-  for (size_t index = 0; index < iArray.size(); index++)
-    *this << iArray.at(index);
-
-  return *this;
-}
-
 inline CArchive& CArchive::streamout(const void* dataPtr, size_t size)
 {
   const uint8_t* ptr = (const uint8_t*)dataPtr;
@@ -415,48 +397,6 @@ CArchive& CArchive::operator>>(CVariant& variant)
   case CVariant::VariantTypeConstNull:
   default:
     break;
-  }
-
-  return *this;
-}
-
-CArchive& CArchive::operator>>(std::vector<std::string>& strArray)
-{
-  size_t size;
-  *this >> size;
-  strArray.clear();
-  for (size_t index = 0; index < size; index++)
-  {
-    std::string str;
-    *this >> str;
-    strArray.push_back(str);
-  }
-
-  return *this;
-}
-
-CArchive& CArchive::operator>>(std::vector<int>& iArray)
-{
-  size_t size;
-  *this >> size;
-  iArray.clear();
-  for (size_t index = 0; index < size; index++)
-  {
-    int i;
-    *this >> i;
-    iArray.push_back(i);
-  }
-
-  return *this;
-}
-
-inline CArchive& CArchive::streamin(void* dataPtr, const size_t size)
-{
-  size_t read = m_pFile->Read(dataPtr, size);
-  if (read < size)
-  {
-    CLog::Log(LOGERROR, "%s: can't stream out: requested %lu bytes, was read %lu bytes", (unsigned long)size, (unsigned long)read);
-    memset(dataPtr, 0, size);
   }
 
   return *this;

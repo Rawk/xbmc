@@ -269,24 +269,9 @@ void CGUIListItem::Archive(CArchive &ar)
     ar << m_strIcon;
     ar << m_bSelected;
     ar << m_overlayIcon;
-    ar << (int)m_mapProperties.size();
-    for (PropertyMap::const_iterator it = m_mapProperties.begin(); it != m_mapProperties.end(); ++it)
-    {
-      ar << it->first;
-      ar << it->second;
-    }
-    ar << (int)m_art.size();
-    for (ArtMap::const_iterator i = m_art.begin(); i != m_art.end(); ++i)
-    {
-      ar << i->first;
-      ar << i->second;
-    }
-    ar << (int)m_artFallbacks.size();
-    for (ArtMap::const_iterator i = m_artFallbacks.begin(); i != m_artFallbacks.end(); ++i)
-    {
-      ar << i->first;
-      ar << i->second;
-    }
+    ar << m_mapProperties;
+    ar << m_art;
+    ar << m_artFallbacks;
   }
   else
   {
@@ -300,33 +285,9 @@ void CGUIListItem::Archive(CArchive &ar)
     int overlayIcon;
     ar >> overlayIcon;
     m_overlayIcon = GUIIconOverlay(overlayIcon);
-
-    int mapSize;
-    ar >> mapSize;
-    for (int i = 0; i < mapSize; i++)
-    {
-      std::string key;
-      CVariant value;
-      ar >> key;
-      ar >> value;
-      SetProperty(key, value);
-    }
-    ar >> mapSize;
-    for (int i = 0; i < mapSize; i++)
-    {
-      std::string key, value;
-      ar >> key;
-      ar >> value;
-      m_art.insert(make_pair(key, value));
-    }
-    ar >> mapSize;
-    for (int i = 0; i < mapSize; i++)
-    {
-      std::string key, value;
-      ar >> key;
-      ar >> value;
-      m_artFallbacks.insert(make_pair(key, value));
-    }
+    ar >> m_mapProperties;
+    ar >> m_art;
+    ar >> m_artFallbacks;
   }
 }
 void CGUIListItem::Serialize(CVariant &value)

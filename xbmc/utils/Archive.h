@@ -22,6 +22,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include "PlatformDefs.h" // for SYSTEMTIME
 
 namespace XFILE
@@ -72,9 +73,11 @@ public:
   CArchive& operator<<(const std::wstring& wstr);
   CArchive& operator<<(const SYSTEMTIME& time);
   CArchive& operator<<(IArchivable& obj);
+  template<class T>
+  CArchive& operator<<(std::vector<T>& vecObjs);
+  template <class Key, class T, class Compare>
+  CArchive& operator<<(std::map<Key, T, Compare>& mapObjs);
   CArchive& operator<<(const CVariant& variant);
-  CArchive& operator<<(const std::vector<std::string>& strArray);
-  CArchive& operator<<(const std::vector<int>& iArray);
 
   // loading
   CArchive& operator>>(float& f);
@@ -93,9 +96,11 @@ public:
   CArchive& operator>>(std::wstring& wstr);
   CArchive& operator>>(SYSTEMTIME& time);
   CArchive& operator>>(IArchivable& obj);
+  template <class T>
+  CArchive& operator>>(std::vector<T>& vecObjs);
+  template <class Key, class T, class Compare>
+  CArchive& operator>>(std::map<Key, T, Compare>& mapObjs);
   CArchive& operator>>(CVariant& variant);
-  CArchive& operator>>(std::vector<std::string>& strArray);
-  CArchive& operator>>(std::vector<int>& iArray);
 
   bool IsLoading();
   bool IsStoring();
@@ -113,4 +118,55 @@ protected:
   uint8_t *m_pBuffer;
   int m_BufferPos;
 };
+
+template <class T>
+CArchive& CArchive::operator<<(std::vector<T>& vecObjs)
+{
+  *this << (size_t)vecObjs.size();
+  for (typename std::vector<T>::iterator it = vecObjs.begin();
+        it != vecObjs.end(); ++it)
+    *this << *it;
+
+  return *this;
+}
+
+template <class T>
+CArchive& CArchive::operator>>(std::vector<T>& vecObjs)
+{
+  size_t size;
+  *this >> size;
+  vecObjs.resize(size);
+  for (typename std::vector<T>::iterator it = vecObjs.begin();
+        it != vecObjs.end(); ++it)
+    *this >> *it;
+
+  return *this;
+}
+
+template <class Key, class T, class Compare>
+CArchive& CArchive::operator<<(std::map<Key, T, Compare>& mapObjs)
+{
+  *this << (size_t)mapObjs.size();
+  for (typename std::map<Key, T, Compare>::iterator it = mapObjs.begin();
+        it != mapObjs.end(); ++it)
+    *this << it->first << it->second;
+
+  return *this;
+}
+
+template <class Key, class T, class Compare>
+CArchive& CArchive::operator>>(std::map<Key, T, Compare>& mapObjs)
+{
+  mapObjs.clear();
+  size_t numObjs;
+  *this >> numObjs;
+  Key key;
+  for (; numObjs > 0; --numObjs)
+  {
+    *this >> key;
+    *this >> mapObjs[key];
+  }
+
+  return *this;
+}
 
