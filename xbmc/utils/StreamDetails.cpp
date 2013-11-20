@@ -326,19 +326,8 @@ const CStreamDetailSubtitle * CStreamDetails::GetNthSubtitleStream(unsigned int 
   if (m_vecSubtitles.empty() || idx > m_vecSubtitles.size())
     return NULL;
 
-  if (idx == 0)
-  {
-    // A good subtitle is the one in the language m_strLanguage.
-    for (std::vector<CStreamDetailSubtitle>::const_iterator it = m_vecSubtitles.begin();
-          it != m_vecSubtitles.end(); ++it)
-    {
-      if (it->m_strLanguage == m_strLanguage)
-        return &(*it);
-    }
-
-    // No good subtitle found. Just return anyone.
+  if (idx == 0) // Currently no priority order for subs, just take the first
     return &m_vecSubtitles.front();
-  }
 
   return &m_vecSubtitles[idx - 1];
 }
