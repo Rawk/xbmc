@@ -57,9 +57,8 @@ public:
   CArchive& operator<<(const CStdStringW& str);
   CArchive& operator<<(const SYSTEMTIME& time);
   CArchive& operator<<(IArchivable& obj);
+  template<class T> CArchive& operator<<(std::vector<T>& objArray);
   CArchive& operator<<(const CVariant& variant);
-  CArchive& operator<<(const std::vector<std::string>& strArray);
-  CArchive& operator<<(const std::vector<int>& iArray);
 
   // loading
   CArchive& operator>>(float& f);
@@ -75,9 +74,8 @@ public:
   CArchive& operator>>(CStdStringW& str);
   CArchive& operator>>(SYSTEMTIME& time);
   CArchive& operator>>(IArchivable& obj);
+  template <class T> CArchive& operator>>(std::vector<T>& array);
   CArchive& operator>>(CVariant& variant);
-  CArchive& operator>>(std::vector<std::string>& strArray);
-  CArchive& operator>>(std::vector<int>& iArray);
 
   bool IsLoading();
   bool IsStoring();
@@ -93,4 +91,28 @@ protected:
   uint8_t *m_pBuffer;
   int m_BufferPos;
 };
+
+template <class T>
+CArchive& CArchive::operator<<(std::vector<T>& objArray)
+{
+  *this << (unsigned int)objArray.size();
+  for (typename std::vector<T>::iterator it = objArray.begin();
+        it != objArray.end(); ++it)
+    *this << *it;
+
+  return *this;
+}
+
+template <class T>
+CArchive& CArchive::operator>>(std::vector<T>& objArray)
+{
+  unsigned int size;
+  *this >> size;
+  objArray.resize(size);
+  for (typename std::vector<T>::iterator it = objArray.begin();
+        it != objArray.end(); ++it)
+    *this >> *it;
+
+  return *this;
+}
 
