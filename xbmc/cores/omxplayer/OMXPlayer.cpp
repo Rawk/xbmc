@@ -4528,7 +4528,7 @@ bool COMXPlayer::GetStreamDetails(CStreamDetails &details)
     }
 
     bool result = CDVDFileInfo::DemuxerToStreamDetails(m_pInputStream, m_pDemuxer, extSubDetails, details);
-    if (result && details.GetStreamCount(CStreamDetail::VIDEO) > 0) // this is more correct (dvds in particular)
+    if (result && details.GetVideoStreamCount() > 0) // this is more correct (dvds in particular)
     {
       /* 
        * We can only obtain the aspect & duration from dvdplayer when the Process() thread is running

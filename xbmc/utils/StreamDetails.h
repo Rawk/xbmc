@@ -100,7 +100,6 @@ public:
   static CStdString VideoAspectToAspectDescription(float fAspect);
 
   bool HasItems(void) const;
-  int GetStreamCount(CStreamDetail::StreamType type) const;
   int GetVideoStreamCount(void) const;
   int GetAudioStreamCount(void) const;
   int GetSubtitleStreamCount(void) const;

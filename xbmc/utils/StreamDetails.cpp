@@ -226,21 +226,6 @@ bool CStreamDetails::HasItems() const
           || !m_vecSubtitles.empty();
 }
 
-int CStreamDetails::GetStreamCount(CStreamDetail::StreamType type) const
-{
-  switch (type)
-  {
-  case CStreamDetail::VIDEO:
-    return m_vecVideos.size();
-  case CStreamDetail::AUDIO:
-    return m_vecAudios.size();
-  case CStreamDetail::SUBTITLE:
-    return m_vecSubtitles.size();
-  }
-
-  return 0;
-}
-
 int CStreamDetails::GetVideoStreamCount(void) const
 {
   return m_vecVideos.size();
