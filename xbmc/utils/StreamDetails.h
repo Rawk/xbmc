@@ -23,7 +23,6 @@
 #include "ISerializable.h"
 #include <vector>
 
-class CStreamDetails;
 
 class CStreamDetail : public IArchivable, public ISerializable
 {
@@ -34,10 +33,10 @@ public:
     SUBTITLE
   };
 
-  CStreamDetail() {};
-  virtual void Archive(CArchive& ar);
-  virtual void Serialize(CVariant& value) const;
+  virtual void Archive(CArchive& ar) = 0;
+  virtual void Serialize(CVariant& value) const = 0;
 };
+
 
 class CStreamDetailVideo : public CStreamDetail
 {
@@ -75,6 +74,7 @@ public:
 
 bool operator< (const CStreamDetailAudio &lhs, const CStreamDetailAudio &rhs);
 
+
 class CStreamDetailSubtitle : public CStreamDetail
 {
 public:
@@ -89,9 +89,8 @@ public:
 class CStreamDetails : public IArchivable, public ISerializable
 {
 public:
-  CStreamDetails() { Reset(); };
+  CStreamDetails() { };
   CStreamDetails(const CStreamDetails &that);
-  ~CStreamDetails() { Reset(); };
   CStreamDetails& operator=(const CStreamDetails &that);
   bool operator ==(const CStreamDetails &that) const;
   bool operator !=(const CStreamDetails &that) const;
