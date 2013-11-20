@@ -170,19 +170,9 @@ CStreamDetails& CStreamDetails::operator=(const CStreamDetails &that)
 {
   if (this != &that)
   {
-    Reset();
-
-    for (std::vector<CStreamDetailVideo>::const_iterator it = that.m_vecVideos.begin();
-          it != that.m_vecVideos.end(); it++)
-      AddStream(*it);
-
-    for (std::vector<CStreamDetailAudio>::const_iterator it = that.m_vecAudios.begin();
-          it != that.m_vecAudios.end(); it++)
-      AddStream(*it);
-
-    for (std::vector<CStreamDetailSubtitle>::const_iterator it = that.m_vecSubtitles.begin();
-          it != that.m_vecSubtitles.end(); it++)
-      AddStream(*it);
+    m_vecVideos = that.m_vecVideos;
+    m_vecAudios = that.m_vecAudios;
+    m_vecSubtitles = that.m_vecSubtitles;
   }
 
   return *this;
@@ -447,52 +437,15 @@ void CStreamDetails::Archive(CArchive& ar)
 {
   if (ar.IsStoring())
   {
-    ar << (int)m_vecVideos.size();
-    for (std::vector<CStreamDetailVideo>::iterator it = m_vecVideos.begin();
-          it != m_vecVideos.end(); it++)
-      ar << (*it);
-
-    ar << (int)m_vecAudios.size();
-    for (std::vector<CStreamDetailAudio>::iterator it = m_vecAudios.begin();
-          it != m_vecAudios.end(); it++)
-      ar << (*it);
-
-    ar << (int)m_vecSubtitles.size();
-    for (std::vector<CStreamDetailSubtitle>::iterator it = m_vecSubtitles.begin();
-          it != m_vecSubtitles.end(); it++)
-      ar << (*it);
+    ar << m_vecVideos;
+    ar << m_vecAudios;
+    ar << m_vecSubtitles;
   }
   else
   {
-    Reset();
-    int count;
-
-    // Read all CStreamDetailVideo
-    ar >> count;
-    for (int i = 0; i < count; i++)
-    {
-      CStreamDetailVideo p;
-      ar >> p;
-      AddStream(p);
-    }
-
-    // Read all CStreamDetailAudio
-    ar >> count;
-    for (int i = 0; i < count; i++)
-    {
-      CStreamDetailAudio p;
-      ar >> p;
-      AddStream(p);
-    }
-
-    // Read all CStreamDetailSubtitle
-    ar >> count;
-    for (int i = 0; i < count; i++)
-    {
-      CStreamDetailSubtitle p;
-      ar >> p;
-      AddStream(p);
-    }
+    ar >> m_vecVideos;
+    ar >> m_vecAudios;
+    ar >> m_vecSubtitles;
   }
 }
 
