@@ -46,7 +46,6 @@ public:
             const std::string &stereoMode = std::string());
   virtual void Archive(CArchive& ar);
   virtual void Serialize(CVariant& value) const;
-  bool IsWorseThan(const CStreamDetailVideo &that) const;
 
   int m_iWidth;
   int m_iHeight;
@@ -57,6 +56,8 @@ public:
 };
 
 bool operator< (const CStreamDetailVideo &lhs, const CStreamDetailVideo &rhs);
+bool operator==(const CStreamDetailVideo &lhs, const CStreamDetailVideo &rhs);
+bool operator!=(const CStreamDetailVideo &lhs, const CStreamDetailVideo &rhs);
 
 class CStreamDetailAudio : public CStreamDetail
 {
@@ -65,7 +66,6 @@ public:
                   const CStdString codec = CStdString());
   virtual void Archive(CArchive& ar);
   virtual void Serialize(CVariant& value) const;
-  bool IsWorseThan(const CStreamDetailAudio &that) const;
 
   int m_iChannels;
   CStdString m_strLanguage;
@@ -73,6 +73,8 @@ public:
 };
 
 bool operator< (const CStreamDetailAudio &lhs, const CStreamDetailAudio &rhs);
+bool operator==(const CStreamDetailAudio &lhs, const CStreamDetailAudio &rhs);
+bool operator!=(const CStreamDetailAudio &lhs, const CStreamDetailAudio &rhs);
 
 
 class CStreamDetailSubtitle : public CStreamDetail
@@ -86,14 +88,15 @@ public:
   CStdString m_strLanguage;
 };
 
+bool operator==(const CStreamDetailSubtitle &lhs, const CStreamDetailSubtitle &rhs);
+bool operator!=(const CStreamDetailSubtitle &lhs, const CStreamDetailSubtitle &rhs);
+
 class CStreamDetails : public IArchivable, public ISerializable
 {
 public:
   CStreamDetails() { };
   CStreamDetails(const CStreamDetails &that);
   CStreamDetails& operator=(const CStreamDetails &that);
-  bool operator ==(const CStreamDetails &that) const;
-  bool operator !=(const CStreamDetails &that) const;
 
   static CStdString VideoDimsToResolutionDescription(int iWidth, int iHeight);
   static CStdString VideoAspectToAspectDescription(float fAspect);
@@ -106,6 +109,10 @@ public:
   const CStreamDetailVideo* GetNthVideoStream(unsigned int idx) const;
   const CStreamDetailAudio* GetNthAudioStream(unsigned int idx) const;
   const CStreamDetailSubtitle* GetNthSubtitleStream(unsigned int idx) const;
+
+  const std::vector<CStreamDetailVideo>& GetVideoStreams() const;
+  const std::vector<CStreamDetailAudio>& GetAudioStreams() const;
+  const std::vector<CStreamDetailSubtitle>& GetSubtitleStreams() const;
 
   CStdString GetVideoCodec(unsigned int idx = 0) const;
   float GetVideoAspect(unsigned int idx = 0) const;
@@ -133,4 +140,7 @@ private:
   std::vector<CStreamDetailAudio> m_vecAudios;
   std::vector<CStreamDetailSubtitle> m_vecSubtitles;
 };
+
+bool operator==(const CStreamDetails &lhs, const CStreamDetails &rhs);
+bool operator!=(const CStreamDetails &lhs, const CStreamDetails &rhs);
 
