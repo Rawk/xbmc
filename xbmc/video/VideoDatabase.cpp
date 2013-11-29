@@ -2465,36 +2465,37 @@ void CVideoDatabase::SetStreamDetailsForFileId(const CStreamDetails& details, in
     BeginTransaction();
     m_pDS->exec(PrepareSQL("DELETE FROM streamdetails WHERE idFile = %i", idFile));
 
-    for (int i=1; i<=details.GetVideoStreamCount(); i++)
+    for (CStreamDetails::VideoConstIt it = details.VideosBegin();
+          it != details.VideosEnd(); ++it)
     {
       m_pDS->exec(PrepareSQL("INSERT INTO streamdetails "
         "(idFile, iStreamType, strVideoCodec, fVideoAspect, iVideoWidth, iVideoHeight, iVideoDuration, strStereoMode) "
         "VALUES (%i,%i,'%s',%f,%i,%i,%i,'%s')",
         idFile, (int)CStreamDetail::VIDEO,
-        details.GetVideoCodec(i).c_str(), details.GetVideoAspect(i),
-        details.GetVideoWidth(i), details.GetVideoHeight(i), details.GetVideoDuration(i),
-        details.GetStereoMode(i).c_str()));
+        it->m_strCodec.c_str(), it->m_fAspect, it->m_iWidth, it->m_iHeight,
+        it->m_iDuration, it->m_strStereoMode.c_str()));
     }
-    for (int i=1; i<=details.GetAudioStreamCount(); i++)
+    for (CStreamDetails::AudioConstIt it = details.AudiosBegin();
+          it != details.AudiosEnd(); ++it)
     {
       m_pDS->exec(PrepareSQL("INSERT INTO streamdetails "
         "(idFile, iStreamType, strAudioCodec, iAudioChannels, strAudioLanguage) "
         "VALUES (%i,%i,'%s',%i,'%s')",
         idFile, (int)CStreamDetail::AUDIO,
-        details.GetAudioCodec(i).c_str(), details.GetAudioChannels(i),
-        details.GetAudioLanguage(i).c_str()));
+        it->m_strCodec.c_str(), it->m_iChannels, it->m_strLanguage.c_str()));
     }
-    for (int i=1; i<=details.GetSubtitleStreamCount(); i++)
+    for (CStreamDetails::SubtitleConstIt it = details.SubtitlesBegin();
+          it != details.SubtitlesEnd(); ++it)
     {
       m_pDS->exec(PrepareSQL("INSERT INTO streamdetails "
         "(idFile, iStreamType, strSubtitleLanguage) "
         "VALUES (%i,%i,'%s')",
         idFile, (int)CStreamDetail::SUBTITLE,
-        details.GetSubtitleLanguage(i).c_str()));
+        it->m_strLanguage.c_str()));
     }
 
     // update the runtime information, if empty
-    if (details.GetVideoDuration())
+    if (details.GetBestVideo().m_iDuration)
     {
       vector< pair<string, int> > tables;
       tables.push_back(make_pair("movie", VIDEODB_ID_RUNTIME));
@@ -2503,7 +2504,7 @@ void CVideoDatabase::SetStreamDetailsForFileId(const CStreamDetails& details, in
       for (vector< pair<string, int> >::iterator i = tables.begin(); i != tables.end(); ++i)
       {
         CStdString sql = PrepareSQL("update %s set c%02d=%d where idFile=%d and c%02d=''",
-                                    i->first.c_str(), i->second, details.GetVideoDuration(), idFile, i->second);
+                                    i->first.c_str(), i->second, details.GetBestVideo().m_iDuration, idFile, i->second);
         m_pDS->exec(sql);
       }
     }
@@ -3331,8 +3332,8 @@ bool CVideoDatabase::GetStreamDetails(CVideoInfoTag& tag) const
     CLog::Log(LOGERROR, "%s(%i) failed", __FUNCTION__, tag.m_iFileId);
   }
 
-  if (details.GetVideoDuration() > 0)
-    tag.m_duration = details.GetVideoDuration();
+  if (details.HasVideo() && details.GetBestVideo().m_iDuration > 0)
+    tag.m_duration = details.GetBestVideo().m_iDuration;
 
   return retVal;
 }

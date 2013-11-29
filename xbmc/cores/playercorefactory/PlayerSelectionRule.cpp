@@ -122,29 +122,39 @@ void CPlayerSelectionRule::GetPlayers(const CFileItem& item, VECPLAYERCORES &vec
 
   if (m_bStreamDetails)
   {
-    if (!item.GetVideoInfoTag()->HasStreamDetails())
+    const CStreamDetails &streamDetails = item.GetVideoInfoTag()->m_streamDetails;
+
+    if (!streamDetails.HasVideo() || !streamDetails.HasAudio())
     {
       CLog::Log(LOGDEBUG, "CPlayerSelectionRule::GetPlayers: cannot check rule: %s, no StreamDetails", m_name.c_str());
       return;
     }
 
-    CStreamDetails streamDetails = item.GetVideoInfoTag()->m_streamDetails;
+    const CStreamDetailVideo &videoStream = streamDetails.GetBestVideo();
+    const CStreamDetailAudio &audioStream = streamDetails.GetBestAudio();
 
-    if (CompileRegExp(m_audioCodec, regExp) && !MatchesRegExp(streamDetails.GetAudioCodec(), regExp)) return;
+    if (CompileRegExp(m_audioCodec, regExp) &&
+        !MatchesRegExp(audioStream.m_strCodec, regExp))
+      return;
     
-    std::stringstream itoa;
-    itoa << streamDetails.GetAudioChannels();
-    CStdString audioChannelsstr = itoa.str();
+    std::stringstream strStreamChannels;
+    strStreamChannels << audioStream.m_iChannels;
 
-    if (CompileRegExp(m_audioChannels, regExp) && !MatchesRegExp(audioChannelsstr, regExp)) return;
+    if (CompileRegExp(m_audioChannels, regExp) &&
+        !MatchesRegExp(strStreamChannels.str(), regExp))
+      return;
 
-    if (CompileRegExp(m_videoCodec, regExp) && !MatchesRegExp(streamDetails.GetVideoCodec(), regExp)) return;
+    if (CompileRegExp(m_videoCodec, regExp) &&
+        !MatchesRegExp(videoStream.m_strCodec, regExp))
+      return;
 
     if (CompileRegExp(m_videoResolution, regExp) &&
-        !MatchesRegExp(CStreamDetails::VideoDimsToResolutionDescription(streamDetails.GetVideoWidth(), streamDetails.GetVideoHeight()), regExp)) return;
+        !MatchesRegExp(videoStream.GetResolutionDescription(), regExp))
+      return;
 
     if (CompileRegExp(m_videoAspect, regExp) &&
-        !MatchesRegExp(CStreamDetails::VideoAspectToAspectDescription(streamDetails.GetVideoAspect()),  regExp)) return;
+        !MatchesRegExp(videoStream.GetAspectDescription(),  regExp))
+      return;
   }
 
   CURL url(item.GetPath());

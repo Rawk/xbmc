@@ -184,34 +184,37 @@ bool CVideoInfoTag::Save(TiXmlNode *node, const CStdString &tag, bool savePathIn
   XMLUtils::SetStringArray(movie, "studio", m_studio);
   XMLUtils::SetString(movie, "trailer", m_strTrailer);
 
-  if (m_streamDetails.HasItems())
+  if (m_streamDetails.HasStreams())
   {
     // it goes fileinfo/streamdetails/[video|audio|subtitle]
     TiXmlElement fileinfo("fileinfo");
     TiXmlElement streamdetails("streamdetails");
-    for (int iStream=1; iStream<=m_streamDetails.GetVideoStreamCount(); iStream++)
+    for (CStreamDetails::VideoConstIt it = m_streamDetails.VideosBegin();
+            it != m_streamDetails.VideosEnd(); ++it)
     {
       TiXmlElement stream("video");
-      XMLUtils::SetString(&stream, "codec", m_streamDetails.GetVideoCodec(iStream));
-      XMLUtils::SetFloat(&stream, "aspect", m_streamDetails.GetVideoAspect(iStream));
-      XMLUtils::SetInt(&stream, "width", m_streamDetails.GetVideoWidth(iStream));
-      XMLUtils::SetInt(&stream, "height", m_streamDetails.GetVideoHeight(iStream));
-      XMLUtils::SetInt(&stream, "durationinseconds", m_streamDetails.GetVideoDuration(iStream));
-      XMLUtils::SetString(&stream, "stereomode", m_streamDetails.GetStereoMode(iStream));
+      XMLUtils::SetString(&stream, "codec", it->m_strCodec);
+      XMLUtils::SetFloat(&stream, "aspect", it->m_fAspect);
+      XMLUtils::SetInt(&stream, "width", it->m_iWidth);
+      XMLUtils::SetInt(&stream, "height", it->m_iHeight);
+      XMLUtils::SetInt(&stream, "durationinseconds", it->m_iDuration);
+      XMLUtils::SetString(&stream, "stereomode", it->m_strStereoMode);
       streamdetails.InsertEndChild(stream);
     }
-    for (int iStream=1; iStream<=m_streamDetails.GetAudioStreamCount(); iStream++)
+    for (CStreamDetails::AudioConstIt it = m_streamDetails.AudiosBegin();
+            it != m_streamDetails.AudiosEnd(); ++it)
     {
       TiXmlElement stream("audio");
-      XMLUtils::SetString(&stream, "codec", m_streamDetails.GetAudioCodec(iStream));
-      XMLUtils::SetString(&stream, "language", m_streamDetails.GetAudioLanguage(iStream));
-      XMLUtils::SetInt(&stream, "channels", m_streamDetails.GetAudioChannels(iStream));
+      XMLUtils::SetString(&stream, "codec", it->m_strCodec);
+      XMLUtils::SetString(&stream, "language", it->m_strLanguage);
+      XMLUtils::SetInt(&stream, "channels", it->m_iChannels);
       streamdetails.InsertEndChild(stream);
     }
-    for (int iStream=1; iStream<=m_streamDetails.GetSubtitleStreamCount(); iStream++)
+    for (CStreamDetails::SubtitleConstIt it = m_streamDetails.SubtitlesBegin();
+            it != m_streamDetails.SubtitlesEnd(); ++it)
     {
       TiXmlElement stream("subtitle");
-      XMLUtils::SetString(&stream, "language", m_streamDetails.GetSubtitleLanguage(iStream));
+      XMLUtils::SetString(&stream, "language", it->m_strLanguage);
       streamdetails.InsertEndChild(stream);
     }
     fileinfo.InsertEndChild(streamdetails);
@@ -519,16 +522,16 @@ void CVideoInfoTag::ToSortable(SortItem& sortable, Field field) const
   case FieldTrackNumber:              sortable[FieldTrackNumber] = m_iTrack; break;
   case FieldTag:                      sortable[FieldTag] = m_tags; break;
 
-  case FieldVideoResolution:          sortable[FieldVideoResolution] = m_streamDetails.GetVideoHeight(); break;
-  case FieldVideoAspectRatio:         sortable[FieldVideoAspectRatio] = m_streamDetails.GetVideoAspect(); break;
-  case FieldVideoCodec:               sortable[FieldVideoCodec] = m_streamDetails.GetVideoCodec(); break;
-  case FieldStereoMode:               sortable[FieldStereoMode] = m_streamDetails.GetStereoMode(); break;
+  case FieldVideoResolution:          sortable[FieldVideoResolution] = m_streamDetails.HasVideo() ? m_streamDetails.GetBestVideo().m_iHeight : 0; break;
+  case FieldVideoAspectRatio:         sortable[FieldVideoAspectRatio] = m_streamDetails.HasVideo() ? m_streamDetails.GetBestVideo().m_fAspect : 0; break;
+  case FieldVideoCodec:               sortable[FieldVideoCodec] = m_streamDetails.HasVideo() ? m_streamDetails.GetBestVideo().m_strCodec : ""; break;
+  case FieldStereoMode:               sortable[FieldStereoMode] = m_streamDetails.HasVideo() ? m_streamDetails.GetBestVideo().m_strStereoMode : ""; break;
 
-  case FieldAudioChannels:            sortable[FieldAudioChannels] = m_streamDetails.GetAudioChannels(); break;
-  case FieldAudioCodec:               sortable[FieldAudioCodec] = m_streamDetails.GetAudioCodec(); break;
-  case FieldAudioLanguage:            sortable[FieldAudioLanguage] = m_streamDetails.GetAudioLanguage(); break;
+  case FieldAudioChannels:            sortable[FieldAudioChannels] = m_streamDetails.HasAudio() ? m_streamDetails.GetBestAudio().m_iChannels : -1; break;
+  case FieldAudioCodec:               sortable[FieldAudioCodec] = m_streamDetails.HasAudio() ? m_streamDetails.GetBestAudio().m_strCodec : ""; break;
+  case FieldAudioLanguage:            sortable[FieldAudioLanguage] = m_streamDetails.HasAudio() ? m_streamDetails.GetBestAudio().m_strLanguage : ""; break;
 
-  case FieldSubtitleLanguage:         sortable[FieldSubtitleLanguage] = m_streamDetails.GetSubtitleLanguage(); break;
+  case FieldSubtitleLanguage:         sortable[FieldSubtitleLanguage] = m_streamDetails.HasSubtitle() ? m_streamDetails.GetBestSubtitle().m_strLanguage : ""; break;
 
   case FieldInProgress:               sortable[FieldInProgress] = m_resumePoint.IsPartWay(); break;
   case FieldDateAdded:                sortable[FieldDateAdded] = m_dateAdded.IsValid() ? m_dateAdded.GetAsDBDateTime() : StringUtils::EmptyString; break;
@@ -776,7 +779,7 @@ void CVideoInfoTag::ParseNative(const TiXmlElement* movie, bool prioritise)
 
 bool CVideoInfoTag::HasStreamDetails() const
 {
-  return m_streamDetails.HasItems();
+  return m_streamDetails.HasStreams();
 }
 
 bool CVideoInfoTag::IsEmpty() const
@@ -792,9 +795,12 @@ unsigned int CVideoInfoTag::GetDuration() const
    Prefer the duration from the stream if it isn't too
    small (60%) compared to the duration from the tag.
    */
-  unsigned int duration = m_streamDetails.GetVideoDuration();
-  if (duration > m_duration * 0.6)
-    return duration;
+  if (m_streamDetails.HasVideo())
+  {
+    unsigned int duration = m_streamDetails.GetBestVideo().m_iDuration;
+    if (duration > m_duration * 0.6)
+      return duration;
+  }
 
   return m_duration;
 }

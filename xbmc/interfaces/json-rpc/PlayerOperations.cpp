@@ -158,7 +158,7 @@ JSONRPC_STATUS CPlayerOperations::GetItem(const CStdString &method, ITransportLa
         {
           CStdString fieldValue = itr->asString();
           if (fieldValue == "cast" || fieldValue == "set" || fieldValue == "setid" || fieldValue == "showlink" || fieldValue == "resume" ||
-             (fieldValue == "streamdetails" && !fileItem->GetVideoInfoTag()->m_streamDetails.HasItems()))
+             (fieldValue == "streamdetails" && !fileItem->GetVideoInfoTag()->m_streamDetails.HasStreams()))
             additionalInfo = true;
         }
 

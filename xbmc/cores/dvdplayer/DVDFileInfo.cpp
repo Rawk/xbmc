@@ -380,15 +380,12 @@ bool CDVDFileInfo::DemuxerToStreamDetails(CDVDInputStream *pInputStream, CDVDDem
   bool retVal = false;
   details.Reset();
 
-  for (int iStream=0; iStream<pDemux->GetNrOfStreams(); iStream++)
+  for (int iStream = 0; iStream < pDemux->GetNrOfStreams(); iStream++)
   {
     CDemuxStream *stream = pDemux->GetStream(iStream);
     if (stream->type == STREAM_VIDEO)
     {
-      CDemuxStreamVideo *v = (CDemuxStreamVideo *)stream;
-      CStreamDetailVideo p(v->iWidth, v->iHeight, v->fAspect,
-                pDemux->GetStreamLength(), "", v->stereo_mode);
-      pDemux->GetStreamCodecName(iStream, p.m_strCodec);
+      int duration = pDemux->GetStreamLength();
 
       // stack handling
       if (URIUtils::IsStack(path))
@@ -400,24 +397,32 @@ bool CDVDFileInfo::DemuxerToStreamDetails(CDVDInputStream *pInputStream, CDVDDem
         // skip first path as we already know the duration
         for (int i = 1; i < files.Size(); i++)
         {
-           int duration;
-           if (CDVDFileInfo::GetFileDuration(files[i]->GetPath(), duration))
-             p.m_iDuration += duration;
+           int fileDuration;
+           if (CDVDFileInfo::GetFileDuration(files[i]->GetPath(), fileDuration))
+             duration += fileDuration;
         }
       }
 
       // finally, calculate seconds
-      if (p.m_iDuration > 0)
-        p.m_iDuration = p.m_iDuration / 1000;
+      duration /= 1000;
 
+      CStdString codec;
+      pDemux->GetStreamCodecName(iStream, codec);
+      CDemuxStreamVideo *v = (CDemuxStreamVideo *)stream;
+
+      CStreamDetailVideo p(v->iWidth, v->iHeight, v->fAspect, duration, codec,
+                            v->stereo_mode);
       details.AddStream(p);
       retVal = true;
     }
 
     else if (stream->type == STREAM_AUDIO)
     {
-      CStreamDetailAudio p(((CDemuxStreamAudio *)stream)->iChannels, stream->language);
-      pDemux->GetStreamCodecName(iStream, p.m_strCodec);
+      CStdString codec;
+      pDemux->GetStreamCodecName(iStream, strCodec);
+
+      CStreamDetailAudio p(((CDemuxStreamAudio *)stream)->iChannels,
+                            stream->language, codec);
       details.AddStream(p);
       retVal = true;
     }
@@ -431,13 +436,10 @@ bool CDVDFileInfo::DemuxerToStreamDetails(CDVDInputStream *pInputStream, CDVDDem
 
 #ifdef HAVE_LIBBLURAY
   // correct bluray runtime. we need the duration from the input stream, not the demuxer.
-  if (pInputStream->IsStreamType(DVDSTREAM_TYPE_BLURAY))
-  {
-    if(((CDVDInputStreamBluray*)pInputStream)->GetTotalTime() > 0)
-    {
-      ((CStreamDetailVideo*)details.GetNthStream(CStreamDetail::VIDEO,0))->m_iDuration = ((CDVDInputStreamBluray*)pInputStream)->GetTotalTime() / 1000;
-    }
-  }
+  if (pInputStream->IsStreamType(DVDSTREAM_TYPE_BLURAY) &&
+      ((CDVDInputStreamBluray*)pInputStream)->GetTotalTime() > 0 &&
+      details.HasVideo())
+    details.GetBestVideo().m_iDuration = ((CDVDInputStreamBluray*)pInputStream)->GetTotalTime() / 1000;
 #endif
   return retVal;
 }

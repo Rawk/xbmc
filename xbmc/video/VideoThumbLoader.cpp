@@ -374,8 +374,8 @@ bool CVideoThumbLoader::LoadItemLookup(CFileItem* pItem)
     // flag extraction
     if (CSettings::Get().GetBool("myvideos.extractflags") &&
        (!pItem->HasVideoInfoTag()                     ||
-        !pItem->GetVideoInfoTag()->HasStreamDetails() ||
-         pItem->GetVideoInfoTag()->m_streamDetails.GetVideoDuration() <= 0))
+        !pItem->GetVideoInfoTag()->m_streamDetails.HasVideo() ||
+         pItem->GetVideoInfoTag()->m_streamDetails.GetBestVideo().m_iDuration <= 0))
     {
       CFileItem item(*pItem);
       CStdString path(item.GetPath());
@@ -531,8 +531,10 @@ void CVideoThumbLoader::DetectAndAddMissingItemData(CFileItem &item)
 
   std::string stereoMode;
   // detect stereomode for videos
-  if (item.HasVideoInfoTag())
-    stereoMode = item.GetVideoInfoTag()->m_streamDetails.GetStereoMode();
+  if (item.HasVideoInfoTag() &&
+      item.GetVideoInfoTag()->m_streamDetails.HasVideo())
+    stereoMode = item.GetVideoInfoTag()->m_streamDetails.GetBestVideo().m_strStereoMode;
+
   if (stereoMode.empty())
   {
     std::string path = item.GetPath();

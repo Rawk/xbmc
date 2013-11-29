@@ -305,9 +305,12 @@ PopulateObjectFromTag(CVideoInfoTag&         tag,
     object.m_MiscInfo.play_count = tag.m_playCount;
     if (resource) {
         resource->m_Duration = tag.GetDuration();
-        if (tag.HasStreamDetails()) {
-            const CStreamDetails &details = tag.m_streamDetails;
-            resource->m_Resolution = NPT_String::FromInteger(details.GetVideoWidth()) + "x" + NPT_String::FromInteger(details.GetVideoHeight());
+        if (tag.m_streamDetails.HasVideo())
+        {
+          resource->m_Resolution =
+            NPT_String::FromInteger(tag.m_streamDetails.GetBestVideo().m_iWidth) +
+            'x' +
+            NPT_String::FromInteger(tag.m_streamDetails.GetBestVideo().m_iHeight);
         }
     }
 

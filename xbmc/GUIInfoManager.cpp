@@ -1771,8 +1771,9 @@ CStdString CGUIInfoManager::GetLabel(int info, int contextWindow, CStdString *fa
           CFileItemPtr item=items.Get(i);
           if (item->HasMusicInfoTag())
             duration += item->GetMusicInfoTag()->GetDuration();
-          else if (item->HasVideoInfoTag())
-            duration += item->GetVideoInfoTag()->m_streamDetails.GetVideoDuration();
+          else if (item->HasVideoInfoTag() &&
+                  item->GetVideoInfoTag()->m_streamDetails.HasVideo())
+            duration += item->GetVideoInfoTag()->m_streamDetails.GetBestVideo().m_iDuration;
         }
         if (duration > 0)
           return StringUtils::SecondsToTimeString(duration);
@@ -4799,40 +4800,47 @@ CStdString CGUIInfoManager::GetItemLabel(const CFileItem *item, int info, CStdSt
     }
     break;
   case LISTITEM_VIDEO_CODEC:
-    if (item->HasVideoInfoTag())
-      return item->GetVideoInfoTag()->m_streamDetails.GetVideoCodec();
+    if (item->HasVideoInfoTag() &&
+        item->GetVideoInfoTag()->m_streamDetails.HasVideo())
+      return item->GetVideoInfoTag()->m_streamDetails.GetBestVideo().m_strCodec;
     break;
   case LISTITEM_VIDEO_RESOLUTION:
-    if (item->HasVideoInfoTag())
-      return CStreamDetails::VideoDimsToResolutionDescription(item->GetVideoInfoTag()->m_streamDetails.GetVideoWidth(), item->GetVideoInfoTag()->m_streamDetails.GetVideoHeight());
+    if (item->HasVideoInfoTag() &&
+        item->GetVideoInfoTag()->m_streamDetails.HasVideo())
+      return item->GetVideoInfoTag()->m_streamDetails.GetBestVideo().GetResolutionDescription();
     break;
   case LISTITEM_VIDEO_ASPECT:
-    if (item->HasVideoInfoTag())
-      return CStreamDetails::VideoAspectToAspectDescription(item->GetVideoInfoTag()->m_streamDetails.GetVideoAspect());
+    if (item->HasVideoInfoTag() &&
+        item->GetVideoInfoTag()->m_streamDetails.HasVideo())
+      return item->GetVideoInfoTag()->m_streamDetails.GetBestVideo().GetAspectDescription();
     break;
   case LISTITEM_AUDIO_CODEC:
-    if (item->HasVideoInfoTag())
+    if (item->HasVideoInfoTag() &&
+        item->GetVideoInfoTag()->m_streamDetails.HasAudio())
     {
-      return item->GetVideoInfoTag()->m_streamDetails.GetAudioCodec();
+      return item->GetVideoInfoTag()->m_streamDetails.GetBestAudio().m_strCodec;
     }
     break;
   case LISTITEM_AUDIO_CHANNELS:
-    if (item->HasVideoInfoTag())
+    if (item->HasVideoInfoTag() &&
+        item->GetVideoInfoTag()->m_streamDetails.HasAudio())
     {
       CStdString strResult;
-      int iChannels = item->GetVideoInfoTag()->m_streamDetails.GetAudioChannels();
+      int iChannels = item->GetVideoInfoTag()->m_streamDetails.GetBestAudio().m_iChannels;
       if (iChannels > -1)
         strResult = StringUtils::Format("%i", iChannels);
       return strResult;
     }
     break;
   case LISTITEM_AUDIO_LANGUAGE:
-    if (item->HasVideoInfoTag())
-      return item->GetVideoInfoTag()->m_streamDetails.GetAudioLanguage();
+    if (item->HasVideoInfoTag() &&
+        item->GetVideoInfoTag()->m_streamDetails.HasAudio())
+      return item->GetVideoInfoTag()->m_streamDetails.GetBestAudio().m_strLanguage;
     break;
   case LISTITEM_SUBTITLE_LANGUAGE:
-    if (item->HasVideoInfoTag())
-      return item->GetVideoInfoTag()->m_streamDetails.GetSubtitleLanguage();
+    if (item->HasVideoInfoTag() &&
+        item->GetVideoInfoTag()->m_streamDetails.HasSubtitle())
+      return item->GetVideoInfoTag()->m_streamDetails.GetBestSubtitle().m_strLanguage;
     break;
   case LISTITEM_STARTTIME:
     if (item->HasPVRChannelInfoTag())
@@ -5031,8 +5039,10 @@ CStdString CGUIInfoManager::GetItemLabel(const CFileItem *item, int info, CStdSt
   case LISTITEM_STEREOSCOPIC_MODE:
     {
       std::string stereoMode = item->GetProperty("stereomode").asString();
-      if (stereoMode.empty() && item->HasVideoInfoTag())
-        stereoMode = CStereoscopicsManager::Get().NormalizeStereoMode(item->GetVideoInfoTag()->m_streamDetails.GetStereoMode());
+      if (stereoMode.empty() && item->HasVideoInfoTag() &&
+          item->GetVideoInfoTag()->m_streamDetails.HasVideo())
+        stereoMode = CStereoscopicsManager::Get().NormalizeStereoMode(
+          item->GetVideoInfoTag()->m_streamDetails.GetBestVideo().m_strStereoMode);
       return stereoMode;
     }
   }
@@ -5169,8 +5179,9 @@ bool CGUIInfoManager::GetItemBool(const CGUIListItem *item, int condition) const
     else if (condition == LISTITEM_IS_STEREOSCOPIC)
     {
       std::string stereoMode = pItem->GetProperty("stereomode").asString();
-      if (stereoMode.empty() && pItem->HasVideoInfoTag())
-          stereoMode = CStereoscopicsManager::Get().NormalizeStereoMode(pItem->GetVideoInfoTag()->m_streamDetails.GetStereoMode());
+      if (stereoMode.empty() && pItem->HasVideoInfoTag() &&
+          pItem->GetVideoInfoTag()->m_streamDetails.HasVideo())
+        stereoMode = CStereoscopicsManager::Get().NormalizeStereoMode(pItem->GetVideoInfoTag()->m_streamDetails.GetBestVideo().m_strStereoMode);
       if (!stereoMode.empty() && stereoMode != "mono")
         return true;
     }

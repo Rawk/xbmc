@@ -4257,13 +4257,12 @@ bool CDVDPlayer::GetStreamDetails(CStreamDetails &details)
       if (subs[i].filename == m_filename)
         continue;
 
-      CStreamDetailSubtitle p;
-      p.m_strLanguage = subs[i].language;
+      CStreamDetailSubtitle p(subs[i].language);
       extSubDetails.push_back(p);
     }
     
     bool result = CDVDFileInfo::DemuxerToStreamDetails(m_pInputStream, m_pDemuxer, extSubDetails, details);
-    if (result && details.GetVideoStreamCount() > 0) // this is more correct (dvds in particular)
+    if (result && details.HasVideo()) // this is more correct (dvds in particular)
     {
       /* 
        * We can only obtain the aspect & duration from dvdplayer when the Process() thread is running
@@ -4272,11 +4271,11 @@ bool CDVDPlayer::GetStreamDetails(CStreamDetails &details)
        */
       float aspect = m_dvdPlayerVideo.GetAspectRatio();
       if (aspect > 0.0f)
-        ((CStreamDetailVideo*)details.GetNthStream(CStreamDetail::VIDEO,0))->m_fAspect = aspect;
+        details.GetBestVideo().m_fAspect = aspect;
 
       int64_t duration = GetTotalTime() / 1000;
       if (duration > 0)
-        ((CStreamDetailVideo*)details.GetNthStream(CStreamDetail::VIDEO,0))->m_iDuration = duration;
+        details.GetBestVideo().m_iDuration = duration;
     }
     return result;
   }

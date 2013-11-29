@@ -25,9 +25,8 @@
 
 const float VIDEOASPECT_EPSILON = 0.025f;
 
-
 CStreamDetailVideo::CStreamDetailVideo(int width, int height, float aspect,
-        int duration, const CStdString &codec, const std::string &stereoMode) :
+        int duration, const std::string &codec, const std::string &stereoMode) :
   m_iWidth(width), m_iHeight(height), m_iDuration(duration), m_strCodec(codec),
   m_strStereoMode(stereoMode)
 {
@@ -35,6 +34,16 @@ CStreamDetailVideo::CStreamDetailVideo(int width, int height, float aspect,
     m_fAspect = (float)m_iWidth / m_iHeight;
   else
     m_fAspect = aspect;
+}
+
+std::string CStreamDetailVideo::GetResolutionDescription() const
+{
+  return CStreamDetails::VideoDimsToResolutionDescription(m_iWidth, m_iHeight);
+}
+
+std::string CStreamDetailVideo::GetAspectDescription() const
+{
+  return CStreamDetails::VideoAspectToAspectDescription(m_fAspect);
 }
 
 void CStreamDetailVideo::Archive(CArchive& ar)
@@ -92,8 +101,8 @@ bool operator!=(const CStreamDetailVideo &lhs, const CStreamDetailVideo &rhs)
   return !(lhs == rhs);
 }
 
-CStreamDetailAudio::CStreamDetailAudio(int channels, const CStdString language,
-                                        const CStdString codec) :
+CStreamDetailAudio::CStreamDetailAudio(int channels, const std::string language,
+                                        const std::string codec) :
   m_iChannels(channels), m_strLanguage(language), m_strCodec(codec)
 {
 }
@@ -147,7 +156,7 @@ bool operator!=(const CStreamDetailAudio &lhs, const CStreamDetailAudio &rhs)
   return !(lhs == rhs);
 }
 
-CStreamDetailSubtitle::CStreamDetailSubtitle(const CStdString &strLanguage)
+CStreamDetailSubtitle::CStreamDetailSubtitle(const std::string &strLanguage)
   : m_strLanguage(strLanguage)
 {
 }
@@ -207,9 +216,9 @@ bool operator==(const CStreamDetails &lhs, const CStreamDetails &rhs)
   if (&lhs == &rhs)
     return true;
 
-  return lhs.GetVideoStreams() == rhs.GetVideoStreams() &&
-         lhs.GetAudioStreams() == rhs.GetAudioStreams() &&
-         lhs.GetSubtitleStreams() == rhs.GetSubtitleStreams();
+  return lhs.GetVideos() == rhs.GetVideos() &&
+         lhs.GetAudios() == rhs.GetAudios() &&
+         lhs.GetSubtitles() == rhs.GetSubtitles();
 }
 
 bool operator!=(const CStreamDetails &lhs, const CStreamDetails &rhs)
@@ -217,23 +226,37 @@ bool operator!=(const CStreamDetails &lhs, const CStreamDetails &rhs)
   return !(lhs == rhs);
 }
 
-bool CStreamDetails::HasItems() const
+bool CStreamDetails::HasStreams() const
 {
-  return !m_vecVideos.empty() || !m_vecAudios.empty()
-          || !m_vecSubtitles.empty();
+  return HasVideo() || HasAudio() || HasSubtitle();
 }
 
-int CStreamDetails::GetVideoStreamCount(void) const
+bool CStreamDetails::HasVideo() const
+{
+  return !m_vecVideos.empty();
+}
+
+bool CStreamDetails::HasAudio() const
+{
+  return !m_vecAudios.empty();
+}
+
+bool CStreamDetails::HasSubtitle() const
+{
+  return !m_vecSubtitles.empty();
+}
+
+int CStreamDetails::GetVideoCount(void) const
 {
   return m_vecVideos.size();
 }
 
-int CStreamDetails::GetAudioStreamCount(void) const
+int CStreamDetails::GetAudioCount(void) const
 {
   return m_vecAudios.size();
 }
 
-int CStreamDetails::GetSubtitleStreamCount(void) const
+int CStreamDetails::GetSubtitleCount(void) const
 {
   return m_vecSubtitles.size();
 }
@@ -265,71 +288,54 @@ void CStreamDetails::Reset(void)
   m_vecSubtitles.clear();
 }
 
-const CStreamDetail* CStreamDetails::GetNthStream(CStreamDetail::StreamType type,
-          unsigned int idx) const
+CStreamDetailVideo & CStreamDetails::GetBestVideo()
 {
-  switch (type)
-  {
-  case CStreamDetail::VIDEO:
-    return GetNthVideoStream(idx);
-  case CStreamDetail::AUDIO:
-    return GetNthAudioStream(idx);
-  case CStreamDetail::SUBTITLE:
-    return GetNthSubtitleStream(idx);
-  }
-
-  return NULL;
+  return *max_element(m_vecVideos.begin(), m_vecVideos.end());
 }
 
-const CStreamDetailVideo* CStreamDetails::GetNthVideoStream(unsigned int idx) const
+CStreamDetailAudio & CStreamDetails::GetBestAudio()
 {
-  if (m_vecVideos.empty() || idx > m_vecVideos.size())
-    return NULL;
-
-  if (idx == 0)
-    return &(*max_element(m_vecVideos.begin(), m_vecVideos.end()));
-
-  return &m_vecVideos[idx - 1];
+  return *max_element(m_vecAudios.begin(), m_vecAudios.end());
 }
 
-const CStreamDetailAudio* CStreamDetails::GetNthAudioStream(unsigned int idx) const
+CStreamDetailSubtitle & CStreamDetails::GetBestSubtitle()
 {
-  if (m_vecAudios.empty() || idx > m_vecAudios.size())
-    return NULL;
-
-  if (idx == 0)
-    return &(*max_element(m_vecAudios.begin(), m_vecAudios.end()));
-
-  return &m_vecAudios[idx - 1];
+  // Currently no priority order for subs, just take the first
+  return m_vecSubtitles.front();
 }
 
-const CStreamDetailSubtitle * CStreamDetails::GetNthSubtitleStream(unsigned int idx) const
+const CStreamDetailVideo & CStreamDetails::GetBestVideo() const
 {
-  if (m_vecSubtitles.empty() || idx > m_vecSubtitles.size())
-    return NULL;
-
-  if (idx == 0) // Currently no priority order for subs, just take the first
-    return &m_vecSubtitles.front();
-
-  return &m_vecSubtitles[idx - 1];
+  return *max_element(VideosBegin(), VideosEnd());
 }
 
-const std::vector<CStreamDetailVideo>& CStreamDetails::GetVideoStreams() const
+const CStreamDetailAudio & CStreamDetails::GetBestAudio() const
+{
+  return *max_element(AudiosBegin(), AudiosEnd());
+}
+
+const CStreamDetailSubtitle & CStreamDetails::GetBestSubtitle() const
+{
+  // Currently no priority order for subs, just take the first
+  return m_vecSubtitles.front();
+}
+
+const std::vector<CStreamDetailVideo>& CStreamDetails::GetVideos() const
 {
   return m_vecVideos;
 }
 
-const std::vector<CStreamDetailAudio>& CStreamDetails::GetAudioStreams() const
+const std::vector<CStreamDetailAudio>& CStreamDetails::GetAudios() const
 {
   return m_vecAudios;
 }
 
-const std::vector<CStreamDetailSubtitle>& CStreamDetails::GetSubtitleStreams() const
+const std::vector<CStreamDetailSubtitle>& CStreamDetails::GetSubtitles() const
 {
   return m_vecSubtitles;
 }
-
-CStdString CStreamDetails::GetVideoCodec(unsigned int idx) const
+/*
+std::string CStreamDetails::GetVideoCodec(unsigned int idx) const
 {
   const CStreamDetailVideo *item = GetNthVideoStream(idx);
   if (item)
@@ -383,7 +389,7 @@ std::string CStreamDetails::GetStereoMode(unsigned int idx) const
     return "";
 }
 
-CStdString CStreamDetails::GetAudioCodec(unsigned int idx) const
+std::string CStreamDetails::GetAudioCodec(unsigned int idx) const
 {
   const CStreamDetailAudio *item = GetNthAudioStream(idx);
   if (item)
@@ -392,7 +398,7 @@ CStdString CStreamDetails::GetAudioCodec(unsigned int idx) const
     return "";
 }
 
-CStdString CStreamDetails::GetAudioLanguage(unsigned int idx) const
+std::string CStreamDetails::GetAudioLanguage(unsigned int idx) const
 {
   const CStreamDetailAudio *item = GetNthAudioStream(idx);
   if (item)
@@ -410,7 +416,7 @@ int CStreamDetails::GetAudioChannels(unsigned int idx) const
     return -1;
 }
 
-CStdString CStreamDetails::GetSubtitleLanguage(unsigned int idx) const
+std::string CStreamDetails::GetSubtitleLanguage(unsigned int idx) const
 {
   const CStreamDetailSubtitle *item = GetNthSubtitleStream(idx);
   if (item)
@@ -418,7 +424,7 @@ CStdString CStreamDetails::GetSubtitleLanguage(unsigned int idx) const
   else
     return "";
 }
-
+*/
 void CStreamDetails::Archive(CArchive& ar)
 {
   if (ar.IsStoring())
@@ -441,8 +447,7 @@ void CStreamDetails::Serialize(CVariant& value) const
 
   // make sure these properties are always present
   value["video"] = CVariant(CVariant::VariantTypeArray);
-  for (std::vector<CStreamDetailVideo>::const_iterator it = m_vecVideos.begin();
-        it != m_vecVideos.end(); ++it)
+  for (VideoConstIt it = VideosBegin(); it != VideosEnd(); ++it)
   {
     v.clear();
     it->Serialize(v);
@@ -451,8 +456,7 @@ void CStreamDetails::Serialize(CVariant& value) const
 
   // make sure these properties are always present
   value["audio"] = CVariant(CVariant::VariantTypeArray);
-  for (std::vector<CStreamDetailAudio>::const_iterator it = m_vecAudios.begin();
-        it != m_vecAudios.end(); ++it)
+  for (AudioConstIt it = AudiosBegin(); it != AudiosEnd(); ++it)
   {
     v.clear();
     it->Serialize(v);
@@ -461,8 +465,7 @@ void CStreamDetails::Serialize(CVariant& value) const
 
   // make sure these properties are always present
   value["subtitle"] = CVariant(CVariant::VariantTypeArray);
-  for (std::vector<CStreamDetailSubtitle>::const_iterator it = m_vecSubtitles.begin();
-        it != m_vecSubtitles.end(); ++it)
+  for (SubtitleConstIt it = SubtitlesBegin(); it != SubtitlesEnd(); ++it)
   {
     v.clear();
     it->Serialize(v);
@@ -470,7 +473,7 @@ void CStreamDetails::Serialize(CVariant& value) const
   }
 }
 
-CStdString CStreamDetails::VideoDimsToResolutionDescription(int iWidth, int iHeight)
+std::string CStreamDetails::VideoDimsToResolutionDescription(int iWidth, int iHeight)
 {
   if (iWidth == 0 || iHeight == 0)
     return "";
@@ -493,7 +496,7 @@ CStdString CStreamDetails::VideoDimsToResolutionDescription(int iWidth, int iHei
     return "4K";
 }
 
-CStdString CStreamDetails::VideoAspectToAspectDescription(float fAspect)
+std::string CStreamDetails::VideoAspectToAspectDescription(float fAspect)
 {
   if (fAspect == 0.0f)
     return "";
