@@ -1456,16 +1456,18 @@ void CVideoDatabase::RemoveTagsFromItem(int idItem, const std::string &type)
 }
 
 //****Actors****
-void CVideoDatabase::AddCast(int idMedia, const char *table, const char *field, const std::vector< SActorInfo > &cast)
+void CVideoDatabase::AddCast(int idMedia, const char *table, const char *field,
+                             const std::vector<CActorInfo> &cast)
 {
   if (cast.empty())
     return;
 
-  int order = std::max_element(cast.begin(), cast.end())->order;
+  int order = std::max_element(cast.begin(), cast.end())->m_iOrder;
   for (CVideoInfoTag::iCast it = cast.begin(); it != cast.end(); ++it)
   {
-    int idActor = AddActor(it->strName, it->thumbUrl.m_xml, it->thumb);
-    AddLinkToActor(table, idActor, field, idMedia, it->strRole, it->order >= 0 ? it->order : ++order);
+    int idActor = AddActor(it->m_strName, it->m_thumbUrl.m_xml, it->m_strThumb);
+    AddLinkToActor(table, idActor, field, idMedia, it->m_strRole,
+                it->m_iOrder >= 0 ? it->m_iOrder : ++order);
   }
 }
 
@@ -3624,7 +3626,8 @@ CVideoInfoTag CVideoDatabase::GetDetailsForMusicVideo(const dbiplus::sql_record*
   return details;
 }
 
-void CVideoDatabase::GetCast(const CStdString &table, const CStdString &table_id, int type_id, vector<SActorInfo> &cast)
+void CVideoDatabase::GetCast(const CStdString &table, const CStdString &table_id,
+                             int type_id, vector<CActorInfo> &cast)
 {
   try
   {
@@ -3643,29 +3646,23 @@ void CVideoDatabase::GetCast(const CStdString &table, const CStdString &table_id
                                 "    art.media_id=actors.idActor AND art.media_type='actor' AND art.type='thumb' "
                                 "WHERE actorlink%s.%s=%i "
                                 "ORDER BY actorlink%s.iOrder",table.c_str(), table.c_str(), table.c_str(), table.c_str(), table.c_str(), table_id.c_str(), type_id, table.c_str());
-    m_pDS2->query(sql.c_str());
-    while (!m_pDS2->eof())
+    for (m_pDS2->query(sql.c_str()); !m_pDS2->eof(); m_pDS2->next())
     {
-      SActorInfo info;
-      info.strName = m_pDS2->fv(0).get_asString();
-      bool found = false;
-      for (vector<SActorInfo>::iterator i = cast.begin(); i != cast.end(); ++i)
-      {
-        if (i->strName == info.strName)
-        {
-          found = true;
-          break;
-        }
-      }
-      if (!found)
-      {
-        info.strRole = m_pDS2->fv(1).get_asString();
-        info.order = m_pDS2->fv(2).get_asInt();
-        info.thumbUrl.ParseString(m_pDS2->fv(3).get_asString());
-        info.thumb = m_pDS2->fv(4).get_asString();
-        cast.push_back(info);
-      }
-      m_pDS2->next();
+      std::string name = m_pDS2->fv(0).get_asString();
+      CVideoInfoTag::iCast it = cast.begin();
+      while (it != cast.end() && it->m_strName != name)
+        ++it;
+
+      if (it != cast.end()) // name already exists: skip it
+        continue;
+
+      CActorInfo info(
+        name,
+        m_pDS2->fv(1).get_asString(), // role
+        CScraperUrl(m_pDS2->fv(3).get_asString()), // thumbUrl
+        m_pDS2->fv(4).get_asString(), // thumb
+        m_pDS2->fv(2).get_asInt()); // order
+      cast.push_back(info);
     }
     m_pDS2->close();
   }
@@ -9073,14 +9070,14 @@ void CVideoDatabase::ExportActorThumbs(const CStdString &strDir, const CVideoInf
     }
   }
 
-  for (CVideoInfoTag::iCast iter = tag.m_cast.begin();iter != tag.m_cast.end();++iter)
+  for (CVideoInfoTag::iCast it = tag.m_cast.begin(); it != tag.m_cast.end(); ++it)
   {
     CFileItem item;
-    item.SetLabel(iter->strName);
-    if (!iter->thumb.empty())
+    item.SetLabel(it->m_strName);
+    if (!it->m_strThumb.empty())
     {
-      CStdString thumbFile(GetSafeFile(strPath, iter->strName));
-      CTextureCache::Get().Export(iter->thumb, thumbFile, overwrite);
+      std::string thumbFile = GetSafeFile(strPath, it->m_strName);
+      CTextureCache::Get().Export(it->m_strThumb, thumbFile, overwrite);
     }
   }
 }

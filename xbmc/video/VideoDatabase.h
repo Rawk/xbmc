@@ -744,7 +744,8 @@ protected:
   void AddToLinkTable(const char *table, const char *firstField, int firstID, const char *secondField, int secondID, const char *typeField = NULL, const char *type = NULL);
   void RemoveFromLinkTable(const char *table, const char *firstField, int firstID, const char *secondField, int secondID, const char *typeField = NULL, const char *type = NULL);
 
-  void AddCast(int idMedia, const char *table, const char *field, const std::vector<SActorInfo> &cast);
+  void AddCast(int idMedia, const char *table, const char *field,
+               const std::vector<CActorInfo> &cast);
   void AddArtistToMusicVideo(int lMVideo, int idArtist);
 
   void AddDirectorToMovie(int idMovie, int idDirector);
@@ -778,7 +779,8 @@ protected:
   CVideoInfoTag GetDetailsForMusicVideo(const dbiplus::sql_record* const record, bool getDetails = false);
   bool GetPeopleNav(const CStdString& strBaseDir, CFileItemList& items, const CStdString& type, int idContent=-1, const Filter &filter = Filter(), bool countOnly = false);
   bool GetNavCommon(const CStdString& strBaseDir, CFileItemList& items, const CStdString& type, int idContent=-1, const Filter &filter = Filter(), bool countOnly = false);
-  void GetCast(const CStdString &table, const CStdString &table_id, int type_id, std::vector<SActorInfo> &cast);
+  void GetCast(const CStdString &table, const CStdString &table_id,
+               int type_id, std::vector<CActorInfo> &cast);
 
   void GetDetailsFromDB(std::auto_ptr<dbiplus::Dataset> &pDS, int min, int max, const SDbTableOffsets *offsets, CVideoInfoTag &details, int idxOffset = 2);
   void GetDetailsFromDB(const dbiplus::sql_record* const record, int min, int max, const SDbTableOffsets *offsets, CVideoInfoTag &details, int idxOffset = 2);

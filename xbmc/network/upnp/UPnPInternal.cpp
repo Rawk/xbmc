@@ -288,7 +288,7 @@ PopulateObjectFromTag(CVideoInfoTag&         tag,
       object.m_Affiliation.genres.Add(tag.m_genre.at(index).c_str());
 
     for(CVideoInfoTag::iCast it = tag.m_cast.begin();it != tag.m_cast.end();it++) {
-        object.m_People.actors.Add(it->strName.c_str(), it->strRole.c_str());
+        object.m_People.actors.Add(it->m_strName.c_str(), it->m_strRole.c_str());
     }
 
     for (unsigned int index = 0; index < tag.m_director.size(); index++)
@@ -502,7 +502,8 @@ BuildObject(CFileItem&                    item,
                     container->m_Affiliation.genres.Add(tag.m_genre.at(index).c_str());
 
                   for(CVideoInfoTag::iCast it = tag.m_cast.begin();it != tag.m_cast.end();it++) {
-                      container->m_People.actors.Add(it->strName.c_str(), it->strRole.c_str());
+                      container->m_People.actors.Add(it->m_strName.c_str(),
+                                                     it->m_strRole.c_str());
                   }
 
                   for (unsigned int index = 0; index < tag.m_director.size(); index++)

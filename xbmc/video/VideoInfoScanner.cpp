@@ -1779,18 +1779,19 @@ namespace VIDEO
     }
   }
 
-  void CVideoInfoScanner::FetchActorThumbs(vector<SActorInfo>& actors, const CStdString& strPath)
+  void CVideoInfoScanner::FetchActorThumbs(vector<CActorInfo>& actors,
+                                           const CStdString& strPath)
   {
     CFileItemList items;
     CStdString actorsDir = URIUtils::AddFileToFolder(strPath, ".actors");
     if (CDirectory::Exists(actorsDir))
       CDirectory::GetDirectory(actorsDir, items, ".png|.jpg|.tbn", DIR_FLAG_NO_FILE_DIRS |
                                DIR_FLAG_NO_FILE_INFO);
-    for (vector<SActorInfo>::iterator i = actors.begin(); i != actors.end(); ++i)
+    for (vector<CActorInfo>::iterator i = actors.begin(); i != actors.end(); ++i)
     {
-      if (i->thumb.empty())
+      if (i->m_strThumb.empty())
       {
-        CStdString thumbFile = i->strName;
+        std::string thumbFile = i->m_strName;
         StringUtils::Replace(thumbFile, ' ', '_');
         for (int j = 0; j < items.Size(); j++)
         {
@@ -1798,14 +1799,14 @@ namespace VIDEO
           URIUtils::RemoveExtension(compare);
           if (!items[j]->m_bIsFolder && compare == thumbFile)
           {
-            i->thumb = items[j]->GetPath();
+            i->m_strThumb = items[j]->GetPath();
             break;
           }
         }
-        if (i->thumb.empty() && !i->thumbUrl.GetFirstThumb().m_url.empty())
-          i->thumb = CScraperUrl::GetThumbURL(i->thumbUrl.GetFirstThumb());
-        if (!i->thumb.empty())
-          CTextureCache::Get().BackgroundCacheImage(i->thumb);
+        if (i->m_strThumb.empty() && !i->m_thumbUrl.GetFirstThumb().m_url.empty())
+          i->m_strThumb = CScraperUrl::GetThumbURL(i->m_thumbUrl.GetFirstThumb());
+        if (!i->m_strThumb.empty())
+          CTextureCache::Get().BackgroundCacheImage(i->m_strThumb);
       }
     }
   }

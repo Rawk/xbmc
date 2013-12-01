@@ -224,10 +224,10 @@ bool CVideoInfoTag::Save(TiXmlNode *node, const CStdString &tag, bool savePathIn
     // add a <actor> tag
     TiXmlElement cast("actor");
     TiXmlNode *node = movie->InsertEndChild(cast);
-    XMLUtils::SetString(node, "name", it->strName);
-    XMLUtils::SetString(node, "role", it->strRole);
-    XMLUtils::SetInt(node, "order", it->order);
-    XMLUtils::SetString(node, "thumb", it->thumbUrl.GetFirstThumb().m_url);
+    XMLUtils::SetString(node, "name", it->m_strName);
+    XMLUtils::SetString(node, "role", it->m_strRole);
+    XMLUtils::SetInt(node, "order", it->m_iOrder);
+    XMLUtils::SetString(node, "thumb", it->m_thumbUrl.GetFirstThumb().m_url);
   }
   XMLUtils::SetStringArray(movie, "artist", m_artist);
   XMLUtils::SetStringArray(movie, "showlink", m_showLink);
@@ -277,11 +277,11 @@ void CVideoInfoTag::Archive(CArchive& ar)
     ar << (int)m_cast.size();
     for (unsigned int i=0;i<m_cast.size();++i)
     {
-      ar << m_cast[i].strName;
-      ar << m_cast[i].strRole;
-      ar << m_cast[i].order;
-      ar << m_cast[i].thumb;
-      ar << m_cast[i].thumbUrl.m_xml;
+      ar << m_cast[i].m_strName;
+      ar << m_cast[i].m_strRole;
+      ar << m_cast[i].m_iOrder;
+      ar << m_cast[i].m_strThumb;
+      ar << m_cast[i].m_thumbUrl.m_xml;
     }
 
     ar << m_strSet;
@@ -351,14 +351,14 @@ void CVideoInfoTag::Archive(CArchive& ar)
     m_cast.reserve(iCastSize);
     for (int i=0;i<iCastSize;++i)
     {
-      SActorInfo info;
-      ar >> info.strName;
-      ar >> info.strRole;
-      ar >> info.order;
-      ar >> info.thumb;
-      CStdString strXml;
+      CActorInfo info;
+      ar >> info.m_strName;
+      ar >> info.m_strRole;
+      ar >> info.m_iOrder;
+      ar >> info.m_strThumb;
+      std::string strXml;
       ar >> strXml;
-      info.thumbUrl.ParseString(strXml);
+      info.m_thumbUrl.ParseString(strXml);
       m_cast.push_back(info);
     }
 
@@ -426,14 +426,14 @@ void CVideoInfoTag::Serialize(CVariant& value) const
   value["studio"] = m_studio;
   value["trailer"] = m_strTrailer;
   value["cast"] = CVariant(CVariant::VariantTypeArray);
-  for (unsigned int i = 0; i < m_cast.size(); ++i)
+  for (iCast it = m_cast.begin(); it != m_cast.end(); ++it)
   {
     CVariant actor;
-    actor["name"] = m_cast[i].strName;
-    actor["role"] = m_cast[i].strRole;
-    actor["order"] = m_cast[i].order;
-    if (!m_cast[i].thumb.empty())
-      actor["thumbnail"] = CTextureUtils::GetWrappedImageURL(m_cast[i].thumb);
+    actor["name"] = it->m_strName;
+    actor["role"] = it->m_strRole;
+    actor["order"] = it->m_iOrder;
+    if (!it->m_strThumb.empty())
+      actor["thumbnail"] = CTextureUtils::GetWrappedImageURL(it->m_strThumb);
     value["cast"].push_back(actor);
   }
   value["set"] = m_strSet;
@@ -543,10 +543,11 @@ const CStdString CVideoInfoTag::GetCast(bool bIncludeRole /*= false*/) const
   for (iCast it = m_cast.begin(); it != m_cast.end(); ++it)
   {
     CStdString character;
-    if (it->strRole.empty() || !bIncludeRole)
-      character = StringUtils::Format("%s\n", it->strName.c_str());
+    if (it->m_strRole.empty() || !bIncludeRole)
+      character = StringUtils::Format("%s\n", it->m_strName.c_str());
     else
-      character = StringUtils::Format("%s %s %s\n", it->strName.c_str(), g_localizeStrings.Get(20347).c_str(), it->strRole.c_str());
+      character = StringUtils::Format("%s %s %s\n", it->m_strName.c_str(),
+                g_localizeStrings.Get(20347).c_str(), it->m_strRole.c_str());
     strLabel += character;
   }
   return StringUtils::TrimRight(strLabel, "\n");
@@ -643,19 +644,20 @@ void CVideoInfoTag::ParseNative(const TiXmlElement* movie, bool prioritise)
     const TiXmlNode *actor = node->FirstChild("name");
     if (actor && actor->FirstChild())
     {
-      SActorInfo info;
-      info.strName = actor->FirstChild()->Value();
-      XMLUtils::GetString(node, "role", info.strRole);
-      XMLUtils::GetInt(node, "order", info.order);
+      CActorInfo info(
+            actor->FirstChild()->Value()); // name
+      XMLUtils::GetString(node, "role", info.m_strRole);
+      XMLUtils::GetInt(node, "order", info.m_iOrder);
       const TiXmlElement* thumb = node->FirstChildElement("thumb");
       while (thumb)
       {
-        info.thumbUrl.ParseElement(thumb);
+        info.m_thumbUrl.ParseElement(thumb);
         thumb = thumb->NextSiblingElement("thumb");
       }
-      const char* clear=node->Attribute("clear");
+      const char* clear = node->Attribute("clear");
       if (clear && stricmp(clear,"true"))
         m_cast.clear();
+
       m_cast.push_back(info);
     }
     node = node->NextSiblingElement("actor");

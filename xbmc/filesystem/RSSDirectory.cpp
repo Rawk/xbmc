@@ -218,9 +218,7 @@ static void ParseItemMRSS(CFileItem* item, SResources& resources, TiXmlElement* 
       vtag->m_writingCredits.push_back(text);
     else if(role == "actor")
     {
-      SActorInfo actor;
-      actor.strName = text;
-      vtag->m_cast.push_back(actor);
+      vtag->m_cast.push_back(CActorInfo(text));
     }
   }
   else if(name == "copyright")

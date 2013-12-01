@@ -276,17 +276,18 @@ void CGUIDialogVideoInfo::SetMovie(const CFileItem *item)
   { // movie/show/episode
     for (CVideoInfoTag::iCast it = m_movieItem->GetVideoInfoTag()->m_cast.begin(); it != m_movieItem->GetVideoInfoTag()->m_cast.end(); ++it)
     {
-      CStdString character;
-      if (it->strRole.empty())
-        character = it->strName;
+      std::string character;
+      if (it->m_strRole.empty())
+        character = it->m_strName;
       else
-        character = StringUtils::Format("%s %s %s", it->strName.c_str(), g_localizeStrings.Get(20347).c_str(), it->strRole.c_str());
-      CFileItemPtr item(new CFileItem(it->strName));
-      if (!it->thumb.empty())
-        item->SetArt("thumb", it->thumb);
+        character = StringUtils::Format("%s %s %s", it->m_strName.c_str(),
+                  g_localizeStrings.Get(20347).c_str(), it->m_strRole.c_str());
+      CFileItemPtr item(new CFileItem(it->m_strName));
+      if (!it->m_strThumb.empty())
+        item->SetArt("thumb", it->m_strThumb);
       else if (CSettings::Get().GetBool("videolibrary.actorthumbs"))
       { // backward compatibility
-        CStdString thumb = CScraperUrl::GetThumbURL(it->thumbUrl.GetFirstThumb());
+        std::string thumb = CScraperUrl::GetThumbURL(it->m_thumbUrl.GetFirstThumb());
         if (!thumb.empty())
         {
           item->SetArt("thumb", thumb);

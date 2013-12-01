@@ -31,18 +31,25 @@ class CArchive;
 class TiXmlNode;
 class TiXmlElement;
 
-struct SActorInfo
+class CActorInfo
 {
-  SActorInfo() : order(-1) {};
-  bool operator<(const SActorInfo &right) const
+public:
+  CActorInfo(const std::string &name = std::string(),
+             const std::string &role = std::string(),
+             const CScraperUrl &thumbUrl = CScraperUrl(),
+             const std::string &thumb = std::string(), int order = -1) :
+      m_strName(name), m_strRole(role), m_thumbUrl(thumbUrl),
+      m_strThumb(thumb), m_iOrder(order) {};
+  bool operator<(const CActorInfo &right) const
   {
-    return order < right.order;
+    return m_iOrder < right.m_iOrder;
   }
-  CStdString strName;
-  CStdString strRole;
-  CScraperUrl thumbUrl;
-  CStdString thumb;
-  int        order;
+
+  std::string m_strName;
+  std::string m_strRole;
+  CScraperUrl m_thumbUrl;
+  std::string m_strThumb;
+  int m_iOrder;
 };
 
 class CVideoInfoTag : public IArchivable, public ISerializable, public ISortable
@@ -107,8 +114,8 @@ public:
   CStdString m_strSortTitle;
   CStdString m_strVotes;
   std::vector<std::string> m_artist;
-  std::vector< SActorInfo > m_cast;
-  typedef std::vector< SActorInfo >::const_iterator iCast;
+  std::vector<CActorInfo> m_cast;
+  typedef std::vector<CActorInfo>::const_iterator iCast;
   CStdString m_strSet;
   int m_iSetId;
   std::vector<std::string> m_tags;

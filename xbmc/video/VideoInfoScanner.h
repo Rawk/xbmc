@@ -174,10 +174,10 @@ namespace VIDEO
 
     /*! \brief Fetch thumbs for actors
      Updates each actor with their thumb (local or online)
-     \param actors - vector of SActorInfo
+     \param actors - vector of CActorInfo
      \param strPath - path on filesystem to look for local thumbs
      */
-    void FetchActorThumbs(std::vector<SActorInfo>& actors, const CStdString& strPath);
+    void FetchActorThumbs(std::vector<CActorInfo>& actors, const CStdString& strPath);
 
     static int GetPathHash(const CFileItemList &items, CStdString &hash);
 

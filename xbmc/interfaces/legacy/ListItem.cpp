@@ -303,10 +303,10 @@ namespace XBMCAddon
 //              }
 //              else
 //                pActor = pTuple;
-//              SActorInfo info;
-//              if (!PyXBMCGetUnicodeString(info.strName, pActor, 1)) continue;
+//              CActorInfo info;
+//              if (!PyXBMCGetUnicodeString(info.m_strName, pActor, 1)) continue;
 //              if (pRole != NULL)
-//                PyXBMCGetUnicodeString(info.strRole, pRole, 1);
+//                PyXBMCGetUnicodeString(info.m_strRole, pRole, 1);
 //              item->GetVideoInfoTag()->m_cast.push_back(info);
 //            }
 //          }
