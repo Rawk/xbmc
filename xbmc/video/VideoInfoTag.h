@@ -24,14 +24,14 @@
 #include "utils/ScraperUrl.h"
 #include "utils/Fanart.h"
 #include "utils/ISortable.h"
+#include "utils/Archive.h"
 #include "utils/StreamDetails.h"
 #include "video/Bookmark.h"
 
-class CArchive;
 class TiXmlNode;
 class TiXmlElement;
 
-class CActorInfo
+class CActorInfo : public IArchivable
 {
 public:
   CActorInfo(const std::string &name = std::string(),
@@ -40,6 +40,7 @@ public:
              const std::string &thumb = std::string(), int order = -1) :
       m_strName(name), m_strRole(role), m_thumbUrl(thumbUrl),
       m_strThumb(thumb), m_iOrder(order) {};
+  virtual void Archive(CArchive& ar);
   bool operator<(const CActorInfo &right) const
   {
     return m_iOrder < right.m_iOrder;

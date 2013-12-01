@@ -32,6 +32,28 @@
 
 using namespace std;
 
+void CActorInfo::Archive(CArchive& ar)
+{
+  if (ar.IsStoring())
+  {
+    ar << m_strName;
+    ar << m_strRole;
+    ar << m_iOrder;
+    ar << m_strThumb;
+    ar << m_thumbUrl.m_xml;
+  }
+  else
+  {
+    ar >> m_strName;
+    ar >> m_strRole;
+    ar >> m_iOrder;
+    ar >> m_strThumb;
+    std::string strXml;
+    ar >> strXml;
+    m_thumbUrl.ParseString(strXml);
+  }
+}
+
 void CVideoInfoTag::Reset()
 {
   m_director.clear();
@@ -274,16 +296,7 @@ void CVideoInfoTag::Archive(CArchive& ar)
     ar << m_strVotes;
     ar << m_studio;
     ar << m_strTrailer;
-    ar << (int)m_cast.size();
-    for (unsigned int i=0;i<m_cast.size();++i)
-    {
-      ar << m_cast[i].m_strName;
-      ar << m_cast[i].m_strRole;
-      ar << m_cast[i].m_iOrder;
-      ar << m_cast[i].m_strThumb;
-      ar << m_cast[i].m_thumbUrl.m_xml;
-    }
-
+    ar << m_cast;
     ar << m_strSet;
     ar << m_iSetId;
     ar << m_tags;
@@ -316,7 +329,7 @@ void CVideoInfoTag::Archive(CArchive& ar)
     ar << m_iSpecialSortEpisode;
     ar << m_iBookmarkId;
     ar << m_iTrack;
-    ar << dynamic_cast<IArchivable&>(m_streamDetails);
+    ar << m_streamDetails;
     ar << m_showLink;
     ar << m_fEpBookmark;
     ar << m_basePath;
@@ -346,22 +359,7 @@ void CVideoInfoTag::Archive(CArchive& ar)
     ar >> m_strVotes;
     ar >> m_studio;
     ar >> m_strTrailer;
-    int iCastSize;
-    ar >> iCastSize;
-    m_cast.reserve(iCastSize);
-    for (int i=0;i<iCastSize;++i)
-    {
-      CActorInfo info;
-      ar >> info.m_strName;
-      ar >> info.m_strRole;
-      ar >> info.m_iOrder;
-      ar >> info.m_strThumb;
-      std::string strXml;
-      ar >> strXml;
-      info.m_thumbUrl.ParseString(strXml);
-      m_cast.push_back(info);
-    }
-
+    ar >> m_cast;
     ar >> m_strSet;
     ar >> m_iSetId;
     ar >> m_tags;
@@ -394,7 +392,7 @@ void CVideoInfoTag::Archive(CArchive& ar)
     ar >> m_iSpecialSortEpisode;
     ar >> m_iBookmarkId;
     ar >> m_iTrack;
-    ar >> dynamic_cast<IArchivable&>(m_streamDetails);
+    ar >> m_streamDetails;
     ar >> m_showLink;
     ar >> m_fEpBookmark;
     ar >> m_basePath;
