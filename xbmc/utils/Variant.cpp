@@ -278,6 +278,86 @@ CVariant::~CVariant()
   cleanup();
 }
 
+void CVariant::Archive(CArchive &ar)
+{
+  if (ar.IsStoring())
+  {
+    ar << (int)m_type;
+    switch (m_type)
+    {
+    case VariantTypeInteger:
+      ar << m_data.integer;
+      break;
+    case VariantTypeUnsignedInteger:
+      ar << m_data.unsignedinteger;
+      break;
+    case VariantTypeBoolean:
+      ar << m_data.boolean;
+      break;
+    case VariantTypeString:
+      ar << *m_data.string;
+      break;
+    case VariantTypeWideString:
+      ar << *m_data.wstring;
+      break;
+    case VariantTypeDouble:
+      ar << m_data.dvalue;
+      break;
+    case VariantTypeArray:
+      ar << *m_data.array;
+      break;
+    case VariantTypeObject:
+      ar << *m_data.map;
+      break;
+    case VariantTypeNull:
+    case VariantTypeConstNull:
+      break;
+    }
+  }
+  else
+  {
+    cleanup();
+    int type;
+    ar >> type;
+    m_type = (VariantType)type;
+
+    switch (m_type)
+    {
+    case VariantTypeInteger:
+      ar >> m_data.integer;
+      break;
+    case VariantTypeUnsignedInteger:
+      ar >> m_data.unsignedinteger;
+      break;
+    case VariantTypeBoolean:
+      ar >> m_data.boolean;
+      break;
+    case VariantTypeString:
+      m_data.string = new std::string;
+      ar >> *m_data.string;
+      break;
+    case VariantTypeWideString:
+      m_data.wstring = new std::wstring;
+      ar >> *m_data.wstring;
+      break;
+    case VariantTypeDouble:
+      ar >> m_data.dvalue;
+      break;
+    case VariantTypeArray:
+      m_data.array = new VariantArray;
+      ar >> *m_data.array;
+      break;
+    case VariantTypeObject:
+      m_data.map = new VariantMap;
+      ar >> *m_data.map;
+      break;
+    case VariantTypeNull:
+    case VariantTypeConstNull:
+      break;
+    }
+  }
+}
+
 void CVariant::cleanup()
 {
   if (m_type == VariantTypeString)

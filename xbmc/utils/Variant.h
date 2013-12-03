@@ -23,6 +23,7 @@
 #include <string>
 #include <stdint.h>
 #include <wchar.h>
+#include "Archive.h"
 
 int64_t str2int64(const std::string &str, int64_t fallback = 0);
 int64_t str2int64(const std::wstring &str, int64_t fallback = 0);
@@ -31,7 +32,7 @@ uint64_t str2uint64(const std::wstring &str, uint64_t fallback = 0);
 double str2double(const std::string &str, double fallback = 0.0);
 double str2double(const std::wstring &str, double fallback = 0.0);
 
-class CVariant
+class CVariant : public IArchivable
 {
 public:
   enum VariantType
@@ -67,6 +68,8 @@ public:
   CVariant(const std::map<std::string, CVariant> &variantMap);
   CVariant(const CVariant &variant);
   ~CVariant();
+
+  virtual void Archive(CArchive &ar);
 
   bool isInteger() const;
   bool isUnsignedInteger() const;

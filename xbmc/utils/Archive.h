@@ -29,7 +29,6 @@ namespace XFILE
 {
   class CFile;
 }
-class CVariant;
 
 class CArchive;
 
@@ -77,7 +76,6 @@ public:
   CArchive& operator<<(std::vector<T>& vecObjs);
   template <class Key, class T, class Compare>
   CArchive& operator<<(std::map<Key, T, Compare>& mapObjs);
-  CArchive& operator<<(const CVariant& variant);
 
   // loading
   CArchive& operator>>(float& f);
@@ -100,7 +98,6 @@ public:
   CArchive& operator>>(std::vector<T>& vecObjs);
   template <class Key, class T, class Compare>
   CArchive& operator>>(std::map<Key, T, Compare>& mapObjs);
-  CArchive& operator>>(CVariant& variant);
 
   bool IsLoading();
   bool IsStoring();

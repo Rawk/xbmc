@@ -21,7 +21,6 @@
 #include <cstring>
 #include "Archive.h"
 #include "filesystem/File.h"
-#include "Variant.h"
 #include "utils/log.h"
 
 #ifdef __GNUC__
@@ -151,51 +150,6 @@ CArchive& CArchive::operator<<(IArchivable& obj)
   return *this;
 }
 
-CArchive& CArchive::operator<<(const CVariant& variant)
-{
-  *this << (int)variant.type();
-  switch (variant.type())
-  {
-  case CVariant::VariantTypeInteger:
-    *this << variant.asInteger();
-    break;
-  case CVariant::VariantTypeUnsignedInteger:
-    *this << variant.asUnsignedInteger();
-    break;
-  case CVariant::VariantTypeBoolean:
-    *this << variant.asBoolean();
-    break;
-  case CVariant::VariantTypeString:
-    *this << variant.asString();
-    break;
-  case CVariant::VariantTypeWideString:
-    *this << variant.asWideString();
-    break;
-  case CVariant::VariantTypeDouble:
-    *this << variant.asDouble();
-    break;
-  case CVariant::VariantTypeArray:
-    *this << variant.size();
-    for (unsigned int index = 0; index < variant.size(); index++)
-      *this << variant[index];
-    break;
-  case CVariant::VariantTypeObject:
-    *this << variant.size();
-    for (CVariant::const_iterator_map itr = variant.begin_map(); itr != variant.end_map(); itr++)
-    {
-      *this << itr->first;
-      *this << itr->second;
-    }
-    break;
-  case CVariant::VariantTypeNull:
-  case CVariant::VariantTypeConstNull:
-  default:
-    break;
-  }
-
-  return *this;
-}
-
 inline CArchive& CArchive::streamout(const void* dataPtr, size_t size)
 {
   const uint8_t* ptr = (const uint8_t*)dataPtr;
@@ -313,91 +267,6 @@ CArchive& CArchive::operator>>(SYSTEMTIME& time)
 CArchive& CArchive::operator>>(IArchivable& obj)
 {
   obj.Archive(*this);
-
-  return *this;
-}
-
-CArchive& CArchive::operator>>(CVariant& variant)
-{
-  size_t type;
-  *this >> type;
-  variant = CVariant((CVariant::VariantType)type);
-
-  switch (variant.type())
-  {
-  case CVariant::VariantTypeInteger:
-  {
-    int64_t value;
-    *this >> value;
-    variant = value;
-    break;
-  }
-  case CVariant::VariantTypeUnsignedInteger:
-  {
-    uint64_t value;
-    *this >> value;
-    variant = value;
-    break;
-  }
-  case CVariant::VariantTypeBoolean:
-  {
-    bool value;
-    *this >> value;
-    variant = value;
-    break;
-  }
-  case CVariant::VariantTypeString:
-  {
-    std::string value;
-    *this >> value;
-    variant = value;
-    break;
-  }
-  case CVariant::VariantTypeWideString:
-  {
-    std::wstring value;
-    *this >> value;
-    variant = value;
-    break;
-  }
-  case CVariant::VariantTypeDouble:
-  {
-    double value;
-    *this >> value;
-    variant = value;
-    break;
-  }
-  case CVariant::VariantTypeArray:
-  {
-    unsigned int size;
-    *this >> size;
-    for (; size > 0; size--)
-    {
-      CVariant value;
-      *this >> value;
-      variant.append(value);
-    }
-    break;
-  }
-  case CVariant::VariantTypeObject:
-  {
-    unsigned int size;
-    *this >> size;
-    for (; size > 0; size--)
-    {
-      std::string name;
-      CVariant value;
-      *this >> name;
-      *this >> value;
-      variant[name] = value;
-    }
-    break;
-  }
-  case CVariant::VariantTypeNull:
-  case CVariant::VariantTypeConstNull:
-  default:
-    break;
-  }
 
   return *this;
 }
