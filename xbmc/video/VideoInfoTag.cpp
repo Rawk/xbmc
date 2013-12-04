@@ -54,6 +54,20 @@ void CActorInfo::Archive(CArchive& ar)
   }
 }
 
+bool operator==(const CActorInfo &lhs, const CActorInfo &rhs)
+{
+  return lhs.m_iOrder == rhs.m_iOrder &&
+         lhs.m_strName == rhs.m_strName &&
+         lhs.m_strRole == rhs.m_strRole &&
+         lhs.m_strThumb == rhs.m_strThumb &&
+         lhs.m_thumbUrl == rhs.m_thumbUrl;
+}
+
+bool operator!=(const CActorInfo &lhs, const CActorInfo &rhs)
+{
+  return !(lhs == rhs);
+}
+
 void CVideoInfoTag::Reset()
 {
   m_director.clear();

@@ -53,6 +53,9 @@ public:
   int m_iOrder;
 };
 
+bool operator==(const CActorInfo &lhs, const CActorInfo &rhs);
+bool operator!=(const CActorInfo &lhs, const CActorInfo &rhs);
+
 class CVideoInfoTag : public IArchivable, public ISerializable, public ISortable
 {
 public:

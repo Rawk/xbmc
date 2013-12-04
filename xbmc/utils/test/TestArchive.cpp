@@ -20,6 +20,7 @@
 
 #include "utils/Archive.h"
 #include "utils/Variant.h"
+#include "video/VideoInfoTag.h"
 #include "filesystem/File.h"
 
 #include "test/TestUtils.h"
@@ -194,7 +195,7 @@ TEST_F(TestArchive, CharArchive)
   EXPECT_EQ(char_ref, char_var);
 }
 
-TEST_F(TestArchive, CStdStringArchive)
+TEST_F(TestArchive, CStdStringWArchive)
 {
   ASSERT_TRUE(file);
   CStdStringW CStdStringW_ref = L"test CStdStringW", CStdStringW_var = L"";
@@ -211,7 +212,7 @@ TEST_F(TestArchive, CStdStringArchive)
   EXPECT_STREQ(CStdStringW_ref.c_str(), CStdStringW_var.c_str());
 }
 
-TEST_F(TestArchive, CStdStringWArchive)
+TEST_F(TestArchive, CStdStringArchive)
 {
   ASSERT_TRUE(file);
   CStdString CStdString_ref = "test CStdString", CStdString_var = "";
@@ -263,7 +264,30 @@ TEST_F(TestArchive, CVariantArchive)
   EXPECT_TRUE(CVariant_var.isInteger());
 }
 
-TEST_F(TestArchive, StringVectorArchive)
+TEST_F(TestArchive, CActorInfoArchive)
+{
+  ASSERT_TRUE(file);
+  std::string strXML = "<data spoof=\"blah\" gzip=\"yes\">\n"
+              "  <someurl>\n"
+              "  </someurl>\n"
+              "  <someotherurl>\n"
+              "  </someotherurl>\n"
+              "</data>\n";
+  CActorInfo actorInfo_ref("name", "role", CScraperUrl(strXML), "thumb", 1234);
+  CArchive arstore(file, CArchive::store);
+  arstore << actorInfo_ref;
+  arstore.Close();
+
+  ASSERT_TRUE((file->Seek(0, SEEK_SET) == 0));
+  CActorInfo actorInfo_var;
+  CArchive arload(file, CArchive::load);
+  arload >> actorInfo_var;
+  arload.Close();
+
+  EXPECT_EQ(actorInfo_ref, actorInfo_var);
+}
+
+TEST_F(TestArchive, VectorArchive)
 {
   ASSERT_TRUE(file);
   std::vector<std::string> strArray_ref, strArray_var;
@@ -287,28 +311,25 @@ TEST_F(TestArchive, StringVectorArchive)
   EXPECT_STREQ("test strArray_ref 3", strArray_var.at(3).c_str());
 }
 
-TEST_F(TestArchive, IntegerVectorArchive)
+TEST_F(TestArchive, MapArchive)
 {
   ASSERT_TRUE(file);
-  std::vector<int> iArray_ref, iArray_var;
-  iArray_ref.push_back(0);
-  iArray_ref.push_back(1);
-  iArray_ref.push_back(2);
-  iArray_ref.push_back(3);
+  std::map<std::string, std::string> mapStrStr_ref, mapStrStr_var;
+  mapStrStr_ref["key 0"] = "value 0";
+  mapStrStr_ref["key 1"] = "value 1";
+  mapStrStr_ref["key 2"] = "value 2";
+  mapStrStr_ref["key 3"] = "value 3";
 
   CArchive arstore(file, CArchive::store);
-  arstore << iArray_ref;
+  arstore << mapStrStr_ref;
   arstore.Close();
 
   ASSERT_TRUE((file->Seek(0, SEEK_SET) == 0));
   CArchive arload(file, CArchive::load);
-  arload >> iArray_var;
+  arload >> mapStrStr_var;
   arload.Close();
 
-  EXPECT_EQ(0, iArray_var.at(0));
-  EXPECT_EQ(1, iArray_var.at(1));
-  EXPECT_EQ(2, iArray_var.at(2));
-  EXPECT_EQ(3, iArray_var.at(3));
+  EXPECT_EQ(mapStrStr_ref, mapStrStr_var);
 }
 
 TEST_F(TestArchive, MultiTypeArchive)
@@ -332,11 +353,11 @@ TEST_F(TestArchive, MultiTypeArchive)
   strArray_ref.push_back("test strArray_ref 1");
   strArray_ref.push_back("test strArray_ref 2");
   strArray_ref.push_back("test strArray_ref 3");
-  std::vector<int> iArray_ref, iArray_var;
-  iArray_ref.push_back(0);
-  iArray_ref.push_back(1);
-  iArray_ref.push_back(2);
-  iArray_ref.push_back(3);
+  std::map<std::string, std::string> mapStrStr_ref, mapStrStr_var;
+  mapStrStr_ref["key 0"] = "value 0";
+  mapStrStr_ref["key 1"] = "value 1";
+  mapStrStr_ref["key 2"] = "value 2";
+  mapStrStr_ref["key 3"] = "value 3";
 
   CArchive arstore(file, CArchive::store);
   EXPECT_TRUE(arstore.IsStoring());
@@ -354,7 +375,7 @@ TEST_F(TestArchive, MultiTypeArchive)
   arstore << SYSTEMTIME_ref;
   arstore << CVariant_ref;
   arstore << strArray_ref;
-  arstore << iArray_ref;
+  arstore << mapStrStr_ref;
   arstore.Close();
 
   ASSERT_TRUE((file->Seek(0, SEEK_SET) == 0));
@@ -374,7 +395,7 @@ TEST_F(TestArchive, MultiTypeArchive)
   arload >> SYSTEMTIME_var;
   arload >> CVariant_var;
   arload >> strArray_var;
-  arload >> iArray_var;
+  arload >> mapStrStr_var;
   arload.Close();
 
   EXPECT_EQ(float_ref, float_var);
@@ -393,8 +414,5 @@ TEST_F(TestArchive, MultiTypeArchive)
   EXPECT_STREQ("test strArray_ref 1", strArray_var.at(1).c_str());
   EXPECT_STREQ("test strArray_ref 2", strArray_var.at(2).c_str());
   EXPECT_STREQ("test strArray_ref 3", strArray_var.at(3).c_str());
-  EXPECT_EQ(0, iArray_var.at(0));
-  EXPECT_EQ(1, iArray_var.at(1));
-  EXPECT_EQ(2, iArray_var.at(2));
-  EXPECT_EQ(3, iArray_var.at(3));
+  EXPECT_EQ(mapStrStr_ref, mapStrStr_var);
 }

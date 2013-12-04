@@ -111,7 +111,7 @@ TEST(TestCPUInfo, CoreInfo)
 
 TEST(TestCPUInfo, GetCoresUsageString)
 {
-  EXPECT_STRNE("", g_cpuInfo.GetCoresUsageString());
+  EXPECT_STRNE("", g_cpuInfo.GetCoresUsageString().c_str());
 }
 
 TEST(TestCPUInfo, GetCPUFeatures)

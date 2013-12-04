@@ -318,3 +318,32 @@ void CScraperUrl::GetThumbURLs(std::vector<CStdString> &thumbs, const std::strin
     }
   }
 }
+
+bool operator==(const CScraperUrl::SUrlEntry &lhs, const CScraperUrl::SUrlEntry &rhs)
+{
+  return lhs.m_season == rhs.m_season &&
+         lhs.m_isgz == rhs.m_isgz &&
+         lhs.m_post == rhs.m_post &&
+         lhs.m_type == rhs.m_type &&
+         lhs.m_aspect == rhs.m_aspect &&
+         lhs.m_cache == rhs.m_cache &&
+         lhs.m_url == rhs.m_url &&
+         lhs.m_spoof == rhs.m_spoof;
+}
+
+bool operator!=(const CScraperUrl::SUrlEntry &lhs, const CScraperUrl::SUrlEntry &rhs)
+{
+  return !(lhs == rhs);
+}
+
+bool operator==(const CScraperUrl &lhs, const CScraperUrl &rhs)
+{
+  return lhs.relevance == rhs.relevance &&
+         lhs.m_xml == rhs.m_xml &&
+         lhs.m_url == rhs.m_url;
+}
+
+bool operator!=(const CScraperUrl &lhs, const CScraperUrl &rhs)
+{
+  return !(lhs == rhs);
+}

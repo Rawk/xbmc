@@ -87,6 +87,12 @@ public:
   std::vector<SUrlEntry> m_url;
 };
 
+bool operator==(const CScraperUrl::SUrlEntry &lhs, const CScraperUrl::SUrlEntry &rhs);
+bool operator!=(const CScraperUrl::SUrlEntry &lhs, const CScraperUrl::SUrlEntry &rhs);
+
+bool operator==(const CScraperUrl &lhs, const CScraperUrl &rhs);
+bool operator!=(const CScraperUrl &lhs, const CScraperUrl &rhs);
+
 #endif
 
 
