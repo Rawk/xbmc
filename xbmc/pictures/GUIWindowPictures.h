@@ -62,4 +62,7 @@ protected:
 
   CPictureThumbLoader m_thumbLoader;
   bool m_slideShowStarted;
+
+private:
+  static void FilterRawIfHasRegular(CFileItemList& items);
 };

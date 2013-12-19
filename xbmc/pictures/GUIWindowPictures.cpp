@@ -310,6 +310,8 @@ bool CGUIWindowPictures::GetDirectory(const CStdString &strDirectory, CFileItemL
   if (!CGUIMediaWindow::GetDirectory(strDirectory, items))
     return false;
 
+  FilterRawIfHasRegular(items);
+
   CStdString label;
   if (items.GetLabel().empty() && m_rootDir.IsSource(items.GetPath(), CMediaSourceSettings::Get().GetSources("pictures"), &label)) 
     items.SetLabel(label);
@@ -649,3 +651,33 @@ CStdString CGUIWindowPictures::GetStartFolder(const CStdString &dir)
   }
   return CGUIMediaWindow::GetStartFolder(dir);
 }
+
+void CGUIWindowPictures::FilterRawIfHasRegular(CFileItemList& items)
+{
+  VECFILEITEMS vecDelItems;
+  for (std::vector<CFileItemPtr>::const_iterator it1 = items.GetList().begin();
+        it1 != items.GetList().end(); ++it1)
+  {
+    //for (std::vector<CFileItemPtr>::const_iterator it2 = it1 + 1;
+    for (std::vector<CFileItemPtr>::const_iterator it2 = items.GetList().begin();
+          it2 != items.GetList().end(); ++it2)
+    {
+      if ((*it1)->IsRawPicture() == (*it2)->IsRawPicture())
+        continue;
+
+      CStdString strFile1 = (*it1)->GetPath();
+      CStdString strFile2 = (*it2)->GetPath();
+      URIUtils::RemoveExtension(strFile1);
+      URIUtils::RemoveExtension(strFile2);
+      if (StringUtils::EqualsNoCase(strFile1, strFile2))
+      {
+        // Remove the raw one
+        vecDelItems.push_back((*it1)->IsRawPicture() ? *it1 : *it2);
+      }
+    }
+  }
+
+  for (IVECFILEITEMS it = vecDelItems.begin(); it != vecDelItems.end(); ++it)
+    items.Remove(it->get());
+}
+

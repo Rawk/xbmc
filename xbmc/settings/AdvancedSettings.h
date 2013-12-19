@@ -397,6 +397,7 @@ class CAdvancedSettings : public ISettingCallback, public ISettingsHandler
     void SetExtraLogsFromAddon(ADDON::IAddon* addon);
 
     // runtime settings which cannot be set from advancedsettings.xml
+    CStdString m_rawPictureExtensions;
     CStdString m_pictureExtensions;
     CStdString m_musicExtensions;
     CStdString m_videoExtensions;

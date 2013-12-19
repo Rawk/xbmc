@@ -142,6 +142,13 @@ public:
    \return true if item is picture, false otherwise. 
    */
   bool IsPicture() const;
+
+  /*!
+   \brief Check whether it is a picture in raw format, determined by it's
+     filename extension.
+   \return true if extension is a raw format.
+   */
+  bool IsRawPicture() const;
   bool IsLyrics() const;
 
   /*!

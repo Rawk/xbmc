@@ -892,6 +892,12 @@ bool CFileItem::IsPicture() const
   return CUtil::IsPicture(m_strPath);
 }
 
+bool CFileItem::IsRawPicture() const
+{
+  return URIUtils::HasExtension(m_strPath,
+            g_advancedSettings.m_rawPictureExtensions);
+}
+
 bool CFileItem::IsLyrics() const
 {
   return URIUtils::HasExtension(m_strPath, ".cdg|.lrc");
